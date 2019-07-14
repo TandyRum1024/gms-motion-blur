@@ -160,6 +160,7 @@ with (oVTXSPR)
     */
 
     // cull
+    /*
     var _tdist = 1 / point_distance(_camx, _camy, x, y);
     var _dirx = (x - _camx) * _tdist;
     var _diry = (y - _camy) * _tdist;
@@ -171,6 +172,7 @@ with (oVTXSPR)
         mdl_add_floor(_mdl, x - size, y - size, 0.0, size * 2.0, size * 2.0, 0.0, 3, c_white, 1.0);
         mdl_add_wall(_mdl, x - _offx, y - _offy, z + size, _offx * 2.0, _offy * 2.0, size * 2.0, texIdx, c_white, 1.0);
     }
+    */
 }
 d3d_model_primitive_end(_mdl);
 

@@ -30,15 +30,18 @@ z = 4;
 vx = 0;
 vy = 0;
 
-accel = 0.08; // vehicle acceleration
-traction = 0.5; // vehicle traction
+velocity = 0;
+
+accel = 0.08;//0.06; // vehicle acceleration
+accelMax = 8.0;
+traction = 0.02; // vehicle traction
 
 totalVel = 0; // vehicle's current velocity magnitude
 forwardVel = 0; // vehicle's current forward velocity
 sideVel = 0; // vehicle's current forward velocity
 
 rotation = 0; // current rotation
-rotationAccel = 5; // rotation speed
+rotationAccel = 2.5; // rotation speed
 
 // cached sine and cosined vehicle rotation
 rotationSin = dsin(rotation);
@@ -204,37 +207,57 @@ if (camera != noone)
           <argument>
             <kind>1</kind>
             <string>/// Vehicle / hoveboard physics
+/*
 // inputs
 var _inputH = keyboard_check(ord("D")) - keyboard_check(ord("A"));
 var _inputV = keyboard_check(ord("W")) - keyboard_check(ord("S"));
 
 // update rotation
-rotation += rotationAccel * _inputH;
+rotation += rotationAccel * _inputH * min(forwardVel * 0.1, 1.0);
 rotationSin = dsin(rotation);
 rotationCos = dcos(rotation);
-
-// accelerate
-vx += _cos * accel * _inputV;
-vy += _sin * accel * _inputV;
-
+    
 // Update velocity variables
 totalVel = point_distance(0, 0, vx, vy);
 forwardVel = dot_product(rotationCos, rotationSin, vx, vy)
 sideVel = dot_product(-rotationSin, rotationCos, vx, vy); // we switch sine and cosine as we need vector perpendicular to the rotation (AKA "side" vector)
 
+// accelerate
+if (_inputV != 0)
+{
+    var _accelAdd = accel * _inputV;
+    _accelAdd = min(accelMax - forwardVel, _accelAdd);
+    
+    vx += rotationCos * _accelAdd;
+    vy += rotationSin * _accelAdd;
+}
+
 // apply traction
 // https://www.youtube.com/watch?v=LG1CtlFRmpU
-/*
 if (sideVel != 0.0 &amp;&amp; totalVel != 0.0)
 {
-    var _tractionForce = sideVel * traction;
-    vx -= _sin * _tractionForce;
-    vy -= _cos * _tractionForce;
+    var _tractionForce = clamp(sideVel * traction, -0.1, 0.1);
+    // show_debug_message(_tractionForce);
+    vx -= -rotationSin * _tractionForce;
+    vy -= rotationCos * _tractionForce;
+    
+    //vx += rotationCos * _tractionForce;
+    //vy += rotationSin * _tractionForce;    
 }
-*/
+
+// dampen
+/*
+if (_inputV == 0.0)
+{
+    vx *= 0.98;
+    vy *= 0.98;
+}
+
+
 // integrate
 x += vx;
 y += vy;
+*/
 </string>
           </argument>
         </arguments>
@@ -256,13 +279,11 @@ y += vy;
           <argument>
             <kind>1</kind>
             <string>/// (old &amp; unused) physics
-/*
 // update time for various animation related stuff
 time += 1.0;
 
 // get inputs
 var _inputH = keyboard_check(ord("D")) - keyboard_check(ord("A"));
-var _inputH2 = keyboard_check(vk_right) - keyboard_check(vk_left);
 var _inputV = keyboard_check(ord("W")) - keyboard_check(ord("S"));
 var _rotcos = dcos(rotation);
 var _rotsin = dsin(rotation);
@@ -286,7 +307,7 @@ else
 {
     camera.viewmodelSpr = 0;
 }
-*/
+
 
 /*
 /// FPS movement
@@ -306,15 +327,15 @@ vx *= 0.99;
 vy *= 0.99;
 */
 
-/*
+
 vx = lerp(vx, lengthdir_x(velocity, -rotation), 0.08);
 vy = lerp(vy, lengthdir_y(velocity, -rotation), 0.08);
-velocity *= 0.99;
+velocity *= 0.995;
 
 // integrate
 x += vx;
 y += vy;
-*/
+
 </string>
           </argument>
         </arguments>
@@ -338,6 +359,7 @@ y += vy;
           <argument>
             <kind>1</kind>
             <string>/// Debug draw
+/*
 var _cx = window_get_width() * 0.5, _cy = window_get_height() * 0.5;
 var _len = 64;
 
@@ -351,7 +373,8 @@ draw_line_width_colour(_ox, _oy, _ox + rotationCos * forwardVel, _oy + rotationS
 // Car side velocity
 var _svel = abs(sideVel);
 draw_line_width_colour(_cx, _cy, _cx - rotationSin * _svel, _cy + rotationCos * _svel, 2, c_red, c_red);
-show_debug_message(sideVel);
+*/
+// show_debug_message(sideVel);
 </string>
           </argument>
         </arguments>

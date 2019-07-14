@@ -55,6 +55,7 @@
     <font>fonts\fntOwo</font>
     <font>fonts\fntDefault</font>
     <font>fonts\fntMenuSmall</font>
+    <font>fonts\fntMenuTiny</font>
   </fonts>
   <objects name="objects">
     <objects name="TOPVIEW">

@@ -143,10 +143,11 @@ draw_set_halign(1); draw_set_valign(1);
 surface_set_target(surfaceSrc);
 
 draw_clear_alpha(0,0);
-draw_set_font(fntMenuSmall);
-var _str = "Thanos K-Drive#Thanos K-Drive™";//"zik's#PIZZACRYPT™";
-draw_text_transformed_colour(_cx + 4, _cy - 80, _str, 4, 4, 0, c_black, c_black, c_black, c_black, 1.0);
-draw_text_transformed_colour(_cx, _cy - 84, _str, 4, 4, 0, c_yellow, c_yellow, c_yellow, c_yellow, 1.0);
+// draw_set_font(fntMenuSmall);
+draw_set_font(fntMenuTiny);
+var _str = "타노스 호버보드#타노스 호버보드™";//"zik's#PIZZACRYPT™";
+draw_text_transformed_colour(_cx + 4, _cy - 80, _str, 5, 5, 0, c_black, c_black, c_black, c_black, 1.0);
+draw_text_transformed_colour(_cx, _cy - 84, _str, 5, 5, 0, c_yellow, c_yellow, c_yellow, c_yellow, 1.0);
 draw_set_font(fntDefault);
 surface_reset_target();
 
