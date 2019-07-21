@@ -6,16 +6,24 @@
   <NewExtensions/>
   <sounds name="sound"/>
   <sprites name="sprites">
+    <sprite>sprites\sprMask32</sprite>
+    <sprite>sprites\sprMaskSquare32</sprite>
     <sprite>sprites\FMV_UZICKO</sprite>
     <sprite>sprites\texBluenoise64</sprite>
     <sprites name="3D_stuff">
+      <sprites name="particle">
+        <sprite>sprites\tex3DParticle</sprite>
+      </sprites>
       <sprite>sprites\tex3D</sprite>
       <sprite>sprites\texFloor</sprite>
       <sprite>sprites\tex3DBG</sprite>
+      <sprite>sprites\sprThannoOld</sprite>
       <sprite>sprites\sprThanno</sprite>
       <sprite>sprites\sprThannoKdrive</sprite>
       <sprite>sprites\sprViewwep</sprite>
+      <sprite>sprites\sprViewThannoOld</sprite>
       <sprite>sprites\sprViewThanno</sprite>
+      <sprite>sprites\texFlag</sprite>
     </sprites>
     <sprites name="2D_topview">
       <sprite>sprites\sprQuipzoneMask</sprite>
@@ -36,13 +44,19 @@
   </backgrounds>
   <paths name="paths"/>
   <scripts name="scripts">
-    <script>scripts\accerlate_quake.gml</script>
-    <script>scripts\mdl_add_wall.gml</script>
-    <script>scripts\mdl_add_floor.gml</script>
-    <script>scripts\vb_add_wall.gml</script>
-    <script>scripts\vb_add_floor.gml</script>
-    <script>scripts\vb_add_vtx.gml</script>
-    <script>scripts\script6.gml</script>
+    <scripts name="3d_helper">
+      <scripts name="particles">
+        <script>scripts\particle3d_flash_emit.gml</script>
+        <script>scripts\particle3d_smoke_emit.gml</script>
+        <script>scripts\particle3d_spark_emit.gml</script>
+      </scripts>
+      <script>scripts\vb_add_floor.gml</script>
+      <script>scripts\vb_add_wall.gml</script>
+      <script>scripts\vb_add_vtx.gml</script>
+      <script>scripts\mdl_add_floor.gml</script>
+      <script>scripts\mdl_add_wall.gml</script>
+      <script>scripts\accerlate_quake.gml</script>
+    </scripts>
   </scripts>
   <shaders name="shaders">
     <shader type="GLSLES">shaders\sh_motionblur_wip.shader</shader>
@@ -73,12 +87,15 @@
       <objects name="vtx">
         <object>objects\oVTXBLOCK</object>
         <object>objects\oVTXSPR</object>
+        <object>objects\oVTX_FLAG</object>
       </objects>
       <object>objects\oKNT_3DDEMO</object>
       <object>objects\oVTXHELPER</object>
       <object>objects\oBlock3D</object>
       <object>objects\oThanosCar</object>
       <object>objects\oNPC3D</object>
+      <object>objects\oFlag</object>
+      <object>objects\oParticle3D</object>
     </objects>
     <object>objects\oKNT_MENU</object>
   </objects>

@@ -25,7 +25,9 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>size = 32;
+            <string>mask_index = sprMaskSquare32;
+
+size = 32;
 
 z = size;
 sizeX = size * image_xscale;

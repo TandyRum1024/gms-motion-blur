@@ -141,10 +141,13 @@ texture_set_stage(shMotionblurNoise, texBlueNoise);
 viewmodelx = 0;
 viewmodely = 0;
 viewmodelr = 0;
-viewmodelScale = 5;
+viewmodelScale = 3;
 
 viewmodelvelr = 0;
 
+viewmodelShakeCtr = 0; // Counter for viewmodel shaking
+viewmodelShockCtr = 0; // Counter for viewmodel showing ""shocked"" face
+viewmodelFacing = 0; // Viewmodel facing direction. -1 = left, 0 = forward, 1 = right
 viewmodelSpr = 0;
 </string>
           </argument>
@@ -316,6 +319,43 @@ if (instance_exists(oThanosCar) &amp;&amp; keyboard_check_pressed(ord("2")))
           </argument>
         </arguments>
       </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Update viewmodel
+// calculate viewmodel sprite index
+if (viewmodelShockCtr &gt; 0)
+{
+    viewmodelShockCtr--;
+    viewmodelSpr = 3;
+}
+else
+{
+    viewmodelSpr = 1 + viewmodelFacing;
+}
+
+// update viewmodel shake counter
+if (viewmodelShakeCtr &gt; 0)
+    viewmodelShakeCtr--;
+else
+    viewmodelShakeCtr = 0;
+</string>
+          </argument>
+        </arguments>
+      </action>
     </event>
     <event eventtype="8" enumb="77">
       <action>
@@ -390,8 +430,9 @@ var _hudx = window_get_width() &gt;&gt; 1, _hudy = window_get_height() - 21;
 var _colour = make_colour_hsv(time * 2.0, 255, 255); // rainbow colour
 
 /// Viewmodel
-var _vmx = _hudx, _vmy = window_get_height() - 21;
-draw_sprite_ext(sprViewThanno, viewmodelSpr, _vmx, _vmy, viewmodelScale, viewmodelScale, 0, c_white, 1);
+var _vsx = random_range(-viewmodelShakeCtr, viewmodelShakeCtr), _vsy = random_range(-viewmodelShakeCtr, viewmodelShakeCtr), _vsr = random_range(-viewmodelShakeCtr, viewmodelShakeCtr) * 0.8;
+var _vmx = _hudx + random_range(-viewmodelShakeCtr, viewmodelShakeCtr), _vmy = window_get_height() - 21 + viewmodely;
+draw_sprite_ext(sprViewThanno, viewmodelSpr, _vmx + _vsx, _vmy + _vsy, viewmodelScale, viewmodelScale, _vsr, c_white, 1);
 
 /// HUD
 // calculate metre per second
@@ -401,10 +442,10 @@ var _mph = _metreperframe * 26.8224;
 var _t = _mph * 0.5 + 1.0; // animation time
 var _hudstr = string(_mph) + " MPH";
 var _hudrot = dsin(_t * 2.0) * 5 + dcos(_t * 4.5 + 42.0) * 2 + dsin(_t * 10.0 + 84.0) * 1.2;
-var _hudscale = viewmodelScale * 0.3;
+var _hudscale = viewmodelScale * 0.5;
 
 draw_set_halign(1); draw_set_valign(1);
-draw_set_font(fntOwo);
+draw_set_font(fntMenuTiny);
 draw_text_transformed_colour(_hudx + viewmodelx + 2, _hudy + viewmodely + 2, _hudstr, _hudscale, _hudscale, viewmodelr + _hudrot, c_black, c_black, c_black, c_black, 1.0);
 draw_text_transformed_colour(_hudx + viewmodelx, _hudy + viewmodely, _hudstr, _hudscale, _hudscale, viewmodelr + _hudrot, _colour, _colour, _colour, _colour, 1.0);
 draw_set_font(fntDefault);

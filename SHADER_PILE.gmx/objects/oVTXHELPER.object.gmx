@@ -36,6 +36,10 @@ vfmt = vertex_format_end();
 
 vtxCount = 0;
 vbuffStaticUpdated = false;
+
+// model for flag
+modelFlag = d3d_model_create();
+modelFlagUpdated = false;
 </string>
           </argument>
         </arguments>
@@ -57,11 +61,14 @@ vbuffStaticUpdated = false;
           <argument>
             <kind>1</kind>
             <string>/// setup texture atlas
-var _sprNum = sprite_get_number(tex3D), _sprWid = sprite_get_width(tex3D), _sprHei = sprite_get_height(tex3D);
-var surf = surface_create(_sprNum * _sprWid, _sprHei);
+var _sprNum1 = sprite_get_number(tex3D), _sprNum2 = sprite_get_number(tex3DParticle);
+var _sprWid = sprite_get_width(tex3D), _sprHei = sprite_get_height(tex3D);
+var surf = surface_create((_sprNum1 + _sprNum2) * _sprWid, _sprHei);
 surface_set_target(surf);
-for (var i=0; i&lt;_sprNum; i++)
+for (var i=0; i&lt;_sprNum1; i++)
     draw_sprite(tex3D, i, i * _sprWid, 0);
+for (var i=0; i&lt;_sprNum2; i++)
+    draw_sprite(tex3DParticle, i, _sprNum1 * _sprWid + i * _sprWid, 0);
 surface_reset_target();
 
 // immortalize the texture atlas by making it into sprite
@@ -113,6 +120,20 @@ if (!vbuffStaticUpdated)
     vertex_end(_vb);
     vertex_freeze(_vb);
 }
+
+if (!modelFlagUpdated)
+{
+    modelFlagUpdated = true;
+    var _mdl = modelFlag;
+    d3d_model_clear(_mdl);
+    d3d_model_primitive_begin(_mdl, pr_trianglelist);
+    with (oFlag)
+    {
+        d3d_model_wall(_mdl, x - sizeX, y - sizeY, z, x + sizeX, y + sizeY, 0, 1, 1);
+        //mdl_add_wall(modelFlag, x - sizeX, y - sizeY, 0, sizeX * 2.0, sizeY * 2.0, -z, texIdx, c_white, 1.0);
+    }
+    d3d_model_primitive_end(_mdl);
+}
 </string>
           </argument>
         </arguments>
@@ -148,6 +169,7 @@ with (oKNT_3DDEMO)
     _camfov = fov * 0.5;
 }
 
+// Draw billboarded sprites
 d3d_model_clear(_mdl);
 d3d_model_primitive_begin(_mdl, pr_trianglelist);
 with (oVTXSPR)
@@ -160,24 +182,23 @@ with (oVTXSPR)
     */
 
     // cull
-    /*
     var _tdist = 1 / point_distance(_camx, _camy, x, y);
     var _dirx = (x - _camx) * _tdist;
     var _diry = (y - _camy) * _tdist;
     var _anglediff = (1 - dot_product(_camanglecos, _camanglesin, _dirx, _diry)) * 90;
     
-    if (_anglediff &lt; _camfov)
+    if (_anglediff &lt; _camfov + radius)
     {
         var _offx = _diry * -size, _offy = _dirx * size;
-        mdl_add_floor(_mdl, x - size, y - size, 0.0, size * 2.0, size * 2.0, 0.0, 3, c_white, 1.0);
+        if (drawShadow) mdl_add_floor(_mdl, x - size, y - size, 0.0, size * 2.0, size * 2.0, 0.0, 3, c_white, 1.0);
         mdl_add_wall(_mdl, x - _offx, y - _offy, z + size, _offx * 2.0, _offy * 2.0, size * 2.0, texIdx, c_white, 1.0);
     }
-    */
 }
 d3d_model_primitive_end(_mdl);
 
-// submit
+// submit sprites &amp; world mesh
 vertex_submit(vbuffStatic, pr_trianglelist, global.textureAtlas);
+d3d_model_draw(modelFlag, 0, 0, 0, sprite_get_texture(texFlag, 0)); // Draw flag (exceptional case of drawing stuff)
 d3d_model_draw(model, 0, 0, 0, global.textureAtlas);
 //vertex_submit(vbuff, pr_trianglelist, global.textureAtlas);
 </string>

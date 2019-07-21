@@ -655,10 +655,7 @@
     <instance objName="oNPC3D" x="-64" y="64" name="inst_0226B204" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="oNPC3D" x="0" y="32" name="inst_5AE6761B" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
     <instance objName="oNPC3D" x="64" y="-32" name="inst_A27BAC94" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="oNPC3D" x="704" y="160" name="inst_EF0E2991" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="oNPC3D" x="704" y="64" name="inst_B6A692F3" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="oNPC3D" x="704" y="96" name="inst_3CB9D207" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
-    <instance objName="oNPC3D" x="704" y="128" name="inst_999FE05A" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
+    <instance objName="oFlag" x="480" y="96" name="inst_05B04470" locked="0" code="" scaleX="1" scaleY="1" colour="4294967295" rotation="0"/>
   </instances>
   <tiles>
     <tile bgName="bg1" x="288" y="32" w="32" h="32" xo="0" yo="0" id="10000580" name="inst_1C69F025" depth="1000000" locked="0" colour="4294967295" scaleX="1" scaleY="1"/>

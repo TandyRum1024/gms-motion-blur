@@ -25,14 +25,15 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/// Billboarded sprites
-size = 16; // half size
-radius = size; // culling radius
+            <string>/// Non-billboarded sprites
+sizeX = 16; // half size (s)
+sizeY = 16;
+sizeZ = 16;
+radius = sizeX; // culling radius
 
-z = size;
+z = sizeX;
 
 texIdx = 0; // texture index (in texture atlas)
-drawShadow = false; // Draw shadow beneath the sprite?
 </string>
           </argument>
         </arguments>
