@@ -1,0 +1,42 @@
+// 2019-07-29 05:50:11
+#event create
+time = 0;
+quip = "FYI..#You can eat kiwi skin";
+quipCtr = 0;
+
+image_speed = 0;
+depth = -y;
+
+#event step
+if (place_meeting(x, y, oOWOZONE))
+{
+    quipCtr = 80;
+}
+
+if (quipCtr)
+{
+    image_index = 1;
+    quipCtr--;
+}
+else
+{
+    image_index = 0;
+}
+
+#event draw
+var _bottomdelta = bbox_bottom - y;
+draw_sprite_ext(sprShadow, 0, x, y + _bottomdelta, image_xscale, image_yscale, 0, c_white, 1.0);
+draw_self();
+
+#event draw_end
+if (quipCtr)
+{
+    time++;
+    var _bottomdelta = bbox_bottom - y;
+    var _rainbow = make_colour_hsv(time * 25, 255, 255);
+    draw_set_font(fntComicSans);
+    draw_set_halign(1); draw_set_valign(2);
+    draw_text_transformed_colour(x, y - _bottomdelta * 1.5, quip, 1, 1, sin(time * 1.1) * 24 * (quipCtr / 60), _rainbow, _rainbow, _rainbow, _rainbow, 1.0);
+    draw_set_halign(0); draw_set_valign(0);
+    draw_set_font(fntDefault);
+}

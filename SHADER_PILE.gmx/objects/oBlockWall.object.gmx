@@ -76,6 +76,7 @@ if (!_bottom) // no bottom block, Use bottom sprite
 else
 {
     image_index = 0;
+    depth += 32;
     /*
     if (_top) // middle part of wall
         image_index = 0;

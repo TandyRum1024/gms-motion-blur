@@ -3,23 +3,34 @@
   <Configs name="configs">
     <Config>Configs\Default</Config>
   </Configs>
-  <NewExtensions/>
+  <NewExtensions>
+    <extension index="0">extensions\ImNotGUI</extension>
+  </NewExtensions>
   <sounds name="sound"/>
   <sprites name="sprites">
+    <sprite>sprites\sprBlank</sprite>
     <sprite>sprites\sprMask32</sprite>
+    <sprite>sprites\sprMask16</sprite>
     <sprite>sprites\sprMaskSquare32</sprite>
-    <sprite>sprites\FMV_UZICKO</sprite>
     <sprite>sprites\texBluenoise64</sprite>
+    <sprite>sprites\texBayer16</sprite>
     <sprites name="3D_stuff">
       <sprites name="particle">
-        <sprite>sprites\tex3DParticle</sprite>
+        <sprite>sprites\tex3DParticleSmoke</sprite>
+        <sprite>sprites\tex3DParticleSpark</sprite>
+        <sprite>sprites\tex3DParticleFlash</sprite>
+        <sprite>sprites\tex3DParticleSmokeTrail</sprite>
+        <sprite>sprites\tex3DParticleScrap</sprite>
+        <sprite>sprites\tex3DParticleImpulse</sprite>
       </sprites>
-      <sprite>sprites\tex3D</sprite>
+      <sprite>sprites\tex3DMain</sprite>
+      <sprite>sprites\tex3DNPC</sprite>
+      <sprite>sprites\tex3DBarrel</sprite>
+      <sprite>sprites\tex3DBarrelDead</sprite>
+      <sprite>sprites\tex3DPlayer</sprite>
       <sprite>sprites\texFloor</sprite>
       <sprite>sprites\tex3DBG</sprite>
       <sprite>sprites\sprThannoOld</sprite>
-      <sprite>sprites\sprThanno</sprite>
-      <sprite>sprites\sprThannoKdrive</sprite>
       <sprite>sprites\sprViewwep</sprite>
       <sprite>sprites\sprViewThannoOld</sprite>
       <sprite>sprites\sprViewThanno</sprite>
@@ -27,28 +38,42 @@
     </sprites>
     <sprites name="2D_topview">
       <sprite>sprites\sprQuipzoneMask</sprite>
+      <sprite>sprites\sprParticleSmoke1</sprite>
+      <sprite>sprites\sprParticleSmoke2</sprite>
       <sprite>sprites\sprShadow</sprite>
-      <sprite>sprites\sprGato</sprite>
-      <sprite>sprites\sprGatoBack</sprite>
+      <sprite>sprites\sprPlayer</sprite>
+      <sprite>sprites\sprPlayerBack</sprite>
       <sprite>sprites\sprSnonic</sprite>
       <sprite>sprites\sprBlockWallTop</sprite>
       <sprite>sprites\sprBlockWallCeiling</sprite>
       <sprite>sprites\sprBlockWall</sprite>
-      <sprite>sprites\sprDink</sprite>
-      <sprite>sprites\sprFAST</sprite>
+      <sprite>sprites\sprNPC1</sprite>
+      <sprite>sprites\sprNPC2</sprite>
+      <sprite>sprites\sprNPC3</sprite>
+      <sprite>sprites\sprLogo</sprite>
+      <sprite>sprites\sprProjectile</sprite>
+      <sprite>sprites\sprThings</sprite>
+      <sprite>sprites\sprRubble</sprite>
     </sprites>
+    <sprite>sprites\sprPreview</sprite>
+    <sprite>sprites\spr_uiwhitepixel</sprite>
+    <sprite>sprites\spr_uicheck</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\bg1</background>
     <background>background\bg2</background>
+    <background>background\bg3</background>
   </backgrounds>
   <paths name="paths"/>
   <scripts name="scripts">
     <scripts name="3d_helper">
       <scripts name="particles">
         <script>scripts\particle3d_flash_emit.gml</script>
+        <script>scripts\particle3d_impulse_emit.gml</script>
         <script>scripts\particle3d_smoke_emit.gml</script>
+        <script>scripts\particle3d_smoketrail_emit.gml</script>
         <script>scripts\particle3d_spark_emit.gml</script>
+        <script>scripts\particle3d_scrap_emit.gml</script>
       </scripts>
       <script>scripts\vb_add_floor.gml</script>
       <script>scripts\vb_add_wall.gml</script>
@@ -56,43 +81,96 @@
       <script>scripts\mdl_add_floor.gml</script>
       <script>scripts\mdl_add_wall.gml</script>
       <script>scripts\accerlate_quake.gml</script>
+      <script>scripts\define_tex_idx.gml</script>
     </scripts>
+    <scripts name="2d_helper">
+      <script>scripts\animation_set.gml</script>
+      <script>scripts\animation_set_vars.gml</script>
+      <script>scripts\particle2d_emit.gml</script>
+      <script>scripts\particle2d_emit_alt.gml</script>
+    </scripts>
+    <scripts name="IMNOTGUI">
+      <scripts name="DRAW">
+        <scripts name="VTX">
+          <script>scripts\iui_vtx_begin.gml</script>
+          <script>scripts\iui_vtx.gml</script>
+          <script>scripts\iui_vtx_rect.gml</script>
+          <script>scripts\iui_vtx_tri.gml</script>
+        </scripts>
+        <script>scripts\iui_rect.gml</script>
+        <script>scripts\iui_line.gml</script>
+      </scripts>
+      <scripts name="ELEMENT">
+        <script>scripts\iui_button.gml</script>
+        <script>scripts\iui_tab.gml</script>
+        <script>scripts\iui_textbox.gml</script>
+        <script>scripts\iui_label.gml</script>
+        <script>scripts\iui_slider_h.gml</script>
+        <script>scripts\iui_sprite.gml</script>
+        <script>scripts\iui_checkbox.gml</script>
+      </scripts>
+      <script>scripts\iui_reset.gml</script>
+      <script>scripts\iui_init.gml</script>
+      <script>scripts\iui_init_vars.gml</script>
+      <script>scripts\iui_trim_label.gml</script>
+      <script>scripts\iui_align_push.gml</script>
+      <script>scripts\iui_get_all.gml</script>
+      <script>scripts\iui_begin.gml</script>
+      <script>scripts\iui_end.gml</script>
+      <script>scripts\iui_update_io.gml</script>
+      <script>scripts\iui_col16.gml</script>
+      <script>scripts\iui_colLighter.gml</script>
+      <script>scripts\iui_strTrim.gml</script>
+      <script>scripts\iui_pack.gml</script>
+      <script>scripts\iui_shove.gml</script>
+      <script>scripts\iui_asciiShift.gml</script>
+      <script>scripts\iui_style.gml</script>
+      <script>scripts\iui_destroy.gml</script>
+    </scripts>
+    <script>scripts\draw_text_wave.gml</script>
   </scripts>
   <shaders name="shaders">
-    <shader type="GLSLES">shaders\sh_motionblur_wip.shader</shader>
     <shader type="GLSLES">shaders\sh_motionblur_fullscreen.shader</shader>
+    <shader type="GLSLES">shaders\sh_motionblur_fullscreen_clearcenter.shader</shader>
     <shader type="GLSLES">shaders\sh_motionblur_debug.shader</shader>
     <shader type="GLSLES">shaders\shd_fire_calc.shader</shader>
     <shader type="GLSLES">shaders\shd_fire_effect.shader</shader>
+    <shader type="GLSLES">shaders\shd_3d_fade.shader</shader>
   </shaders>
   <fonts name="fonts">
-    <font>fonts\fntOwo</font>
+    <font>fonts\fntComicSans</font>
     <font>fonts\fntDefault</font>
-    <font>fonts\fntMenuSmall</font>
+    <font>fonts\fntMenuSerif</font>
     <font>fonts\fntMenuTiny</font>
   </fonts>
   <objects name="objects">
     <objects name="TOPVIEW">
       <object>objects\oKNT_2DDEMO</object>
       <object>objects\oBLOCK</object>
+      <object>objects\oFX</object>
+      <object>objects\oFX_2</object>
       <object>objects\oGato</object>
       <object>objects\oBlockWall</object>
       <object>objects\oBlockWallTop</object>
       <object>objects\oBlockWallCeiling</object>
-      <object>objects\oFAST</object>
+      <object>objects\oSIGN</object>
       <object>objects\oNPC</object>
+      <object>objects\oThings</object>
       <object>objects\oOWOZONE</object>
+      <object>objects\oMob</object>
+      <object>objects\oProjectile</object>
     </objects>
     <objects name="3D">
       <objects name="vtx">
         <object>objects\oVTXBLOCK</object>
         <object>objects\oVTXSPR</object>
-        <object>objects\oVTX_FLAG</object>
       </objects>
       <object>objects\oKNT_3DDEMO</object>
       <object>objects\oVTXHELPER</object>
       <object>objects\oBlock3D</object>
-      <object>objects\oThanosCar</object>
+      <object>objects\oBarrel3D</object>
+      <object>objects\oBarrel3DDead</object>
+      <object>objects\oPlayer</object>
       <object>objects\oNPC3D</object>
       <object>objects\oFlag</object>
       <object>objects\oParticle3D</object>

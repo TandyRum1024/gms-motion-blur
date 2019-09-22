@@ -80,6 +80,8 @@ else
     else
         image_index = 0;
 }
+
+depth += 32;
 </string>
           </argument>
         </arguments>

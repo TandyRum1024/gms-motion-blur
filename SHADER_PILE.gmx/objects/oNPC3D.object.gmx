@@ -40,14 +40,113 @@
           <argument>
             <kind>1</kind>
             <string>/// Billboarded "NPC" sprites
+time = 0;
+z = size;
+
 // random sprite for NPC stuff
 randomize();
-texIdx = choose(0, 1);
+texOffset = global.textureList[@ ePTEX.NPC, 1];
+npcIdx = choose(0, 1) * 2;
+texIdx = texOffset + npcIdx;
 
 // culling
 size = 16;
 radius = size; // culling radius
-z = size;
+
+drawShadow = true;
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Barrel throw counter
+barrelCtr = room_speed * random_range(4, 6);
+barrelInst = noone;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="3" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Throw barrel
+if (barrelCtr-- &lt; 0)
+{
+    barrelCtr = room_speed * random_range(4, 6);
+    if (barrelInst == noone || !instance_exists(barrelInst))
+    {   
+        var _dir = point_direction(x, y, oPlayer.x, oPlayer.y);
+        var _barrel = instance_create(x, y, oBarrel3D);
+        _barrel.vx = lengthdir_x(random_range(4, 8), _dir);
+        _barrel.vy = lengthdir_y(random_range(4, 8), _dir);
+        _barrel.vz = random_range(6, 9);
+        barrelInst = _barrel;
+    }
+    else
+    {
+        repeat (irandom_range(3, 6))
+        {
+            particle3d_smoke_emit(16, 16 + irandom_range(-8, 8), barrelInst.x + irandom_range(-16, 16), barrelInst.y + irandom_range(-16, 16), barrelInst.z + irandom_range(-16, 16), random_range(-4, 4), random_range(-4, 4), random_range(0.1, 6));
+        }
+        
+        instance_destroy(barrelInst);
+        barrelInst = noone;
+        barrelCtr = room_speed * random_range(1, 2);
+    }
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Update NPC animation
+time += 0.1;
+texIdx = texOffset + npcIdx + floor(time) % 2;
 </string>
           </argument>
         </arguments>
@@ -71,6 +170,7 @@ z = size;
           <argument>
             <kind>1</kind>
             <string>/// Keep this blank to prevent the GM to automatically draw stuff
+
 </string>
           </argument>
         </arguments>

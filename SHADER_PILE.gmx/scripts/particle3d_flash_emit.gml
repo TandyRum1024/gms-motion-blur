@@ -7,9 +7,9 @@ var _fx = instance_create(_x, _y, oParticle3D);
 _fx.z = _z;
 
 // animation settings
-_fx.texOff = 8; // 8th tex from atlas
-_fx.animLen = 3; // with 3 frame animation
-_fx.texIdx = _fx.texOff + 0;
+_fx.texOff = global.textureList[@ ePTEX.FLASH, 1]; // texture index from atlas
+_fx.animLen = global.textureList[@ ePTEX.FLASH, 2]; // sprite frames
+_fx.texIdx = _fx.texOff;
 
 // velocity
 _fx.vx = _vx;
@@ -20,3 +20,5 @@ _fx.vz = _vz;
 _fx.life = _life;
 _fx.size = _size;
 _fx.radius = _size;
+
+return _fx;

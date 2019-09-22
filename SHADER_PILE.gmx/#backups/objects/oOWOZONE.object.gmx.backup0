@@ -1,0 +1,6 @@
+// 2019-07-29 05:47:37
+#event create
+mask_index = sprQuipzoneMask;
+
+#event step_end
+#action action_kill_object

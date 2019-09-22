@@ -41,21 +41,30 @@
             <kind>1</kind>
             <string>z = 0;
 
+// particle attributes
+life = 8;
+groundCollide = 0; // whether to bounce upon collision with ground
+
+// velocity
 vx = 0;
 vy = 0;
 vz = 0;
+grav = 0;
 
+// drawing size &amp; culling radius
 size = 8;
 radius = 8;
 
+// texture offset for calculating texture index
 texOff = 4;
 
+// animation related
 time = 0;
-life = 8;
 animLen = 4;
+animLoop = false;
 
+// texture index
 texIdx = 0;
-// texIdx = texOff + floor(lerp(0, animLen, time / life));
 </string>
           </argument>
         </arguments>
@@ -86,7 +95,14 @@ if (time &gt;= life)
     instance_destroy();
 }
 
-texIdx = texOff + floor(lerp(0, animLen, time / life));
+if (animLoop)
+{
+    texIdx = texOff + floor(time * 0.5) % animLen;
+}
+else
+{
+    texIdx = texOff + floor(lerp(0, animLen, time / life));
+}
 </string>
           </argument>
         </arguments>
@@ -108,9 +124,18 @@ texIdx = texOff + floor(lerp(0, animLen, time / life));
           <argument>
             <kind>1</kind>
             <string>/// Update position
+vz -= grav;
 x += vx;
 y += vy;
 z += vz;
+
+if (groundCollide &amp;&amp; z &lt; 0)
+{
+    z = 0;
+    vz *= -0.7;
+    
+    // emit puff
+}
 </string>
           </argument>
         </arguments>

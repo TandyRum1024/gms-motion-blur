@@ -27,14 +27,73 @@
             <kind>1</kind>
             <string>/// Main menu control object -- Nothing to see. Move on!
 t = 0;
-surfaceFire = surface_create(room_width, room_height); // guy fieri
-surfaceSrc = surface_create(room_width, room_height);
+
+enum eMENU
+{
+    LOGO = 0,
+    SELECT
+}
+
+menuState = 0;
+menuSelected = -1;
+
+menuTransition = false;
+menuTransitionCtr = 0;
+menuTransitionTime = room_speed * 0.25;
+menuTransitionIn = true;
+menuTransitionTarget = eMENU.LOGO;
+
+menuAnimT = 0;
+menuDivPercent = 0;
+
+menuEntryTextAlign = 0;
+menuEntryTitle = "";
+menuEntryDesc = "";
+menuEntryTitleX = 8;
+menuEntryDescX = 42;
+
+menuShowCtr = 0;
+
+// initial seelction
+menuEntryTitleX = 8;
+menuEntryDescX = 42;
+
+menuEntryTextAlign = 0.0;
+menuEntryTitle = "DEMO \#1 : 3D";
+menuEntryDesc = "Th*nos is riding a hoverboard in 3D..#Why is he riding a hoverboard?#IDK.";
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Logo flame effect shader
+surfaceFire = surface_create(room_width &gt;&gt; 2, room_height &gt;&gt; 2);
+surfaceSrc = surface_create(room_width &gt;&gt; 2, room_height &gt;&gt; 2);
 surface_set_target(surfaceFire);
 draw_clear_alpha(0,0);
 surface_reset_target();
 surface_set_target(surfaceSrc);
 draw_clear_alpha(0,0);
 surface_reset_target();
+
+fireSpeed = 2;
+fireWindAmp = 2;
+fireWindSpeed = 4;
 
 // Shader uniforms
 // fire calculation
@@ -47,6 +106,59 @@ uWindStrength = shader_get_uniform(shd_fire_calc, "u_windstrength");
 uWindSpeed = shader_get_uniform(shd_fire_calc, "u_windspeed");
 
 texture_set_stage(uCoolingMap, sprite_get_texture(texFloor, 0));
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Disable 3D just in case
+show_debug_message("MENU : " + string(menuState));
+draw_set_alpha_test(false);
+d3d_set_culling(false);
+d3d_set_projection_ortho(0,0,window_get_width(),window_get_height(),0);
+d3d_end();
+
+application_surface_draw_enable(true);
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="1" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>surface_free(surfaceFire);
+surface_free(surfaceSrc);
+
 </string>
           </argument>
         </arguments>
@@ -71,11 +183,10 @@ texture_set_stage(uCoolingMap, sprite_get_texture(texFloor, 0));
             <kind>1</kind>
             <string>/// time update &amp; surface heartbeat
 t++;
-
 if (!surface_exists(surfaceSrc))
-    surfaceSrc = surface_create(window_get_width(), window_get_height());
+    surfaceSrc = surface_create(window_get_width() &gt;&gt; 2, window_get_height() &gt;&gt; 2);
 if (!surface_exists(surfaceFire))
-    surfaceFire = surface_create(window_get_width(), window_get_height());
+    surfaceFire = surface_create(window_get_width() &gt;&gt; 2, window_get_height() &gt;&gt; 2);
 </string>
           </argument>
         </arguments>
@@ -96,7 +207,108 @@ if (!surface_exists(surfaceFire))
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/// input
+            <string>/// menu update
+/// Update menu transition
+if (menuTransitionCtr++ &gt; menuTransitionTime)
+{
+    if (menuTransitionIn)
+    {
+        menuState = menuTransitionTarget;
+        menuTransitionIn = false;
+        menuTransitionCtr = 0;
+    }
+    else
+    {
+        menuTransition = false;
+    }
+}
+
+/// Update menu state
+switch (menuState)
+{
+    default:
+    case eMENU.LOGO:
+        fireSpeed = 2.0;
+        fireWindAmp = 3.0;
+        fireWindSpeed = 7.0;
+        
+        if (keyboard_check_pressed(vk_anykey) &amp;&amp; !menuTransition)
+        {
+            menuTransition = true;
+            menuTransitionIn = true;
+            menuTransitionCtr = 0;
+            menuTransitionTarget = eMENU.SELECT;
+        }
+        break;
+    case eMENU.SELECT:
+        fireSpeed = 0.5;
+        fireWindAmp = 0.1;
+        fireWindSpeed = 0.5;
+        
+        if (keyboard_check_pressed(vk_escape) &amp;&amp; !menuTransition)
+        {
+            menuTransition = true;
+            menuTransitionIn = true;
+            menuTransitionCtr = 0;
+            menuTransitionTarget = eMENU.LOGO;
+        }
+        
+        var _axisH = keyboard_check(vk_right) - keyboard_check(vk_left);
+        if (_axisH != 0)
+        {
+            menuSelected = _axisH;
+            menuAnimT = 0;
+            menuShowCtr = 0;
+            
+            // determine what to draw depending on which menu is currently selected    
+            if (menuSelected &lt; 0)
+            {
+                menuEntryTitleX = 8;
+                menuEntryDescX = 42;
+                
+                menuEntryTextAlign = 0.0;
+                menuEntryTitle = "DEMO \#1 : 3D";
+                menuEntryDesc = "Th*nos is riding a hoverboard in 3D..#Why is he riding a hoverboard?#IDK.";
+            }
+            else
+            {
+                menuEntryTitleX = surface_get_width(surfaceSrc) - 8;
+                menuEntryDescX = window_get_width() - 42;
+                
+                menuEntryTextAlign = 2.0;
+                menuEntryTitle = "DEMO \#2 : 2D";
+                menuEntryDesc = "I mean if you can do it in 3D,#You can probably do it in 2D, too.";
+            }
+        }
+        
+        if (keyboard_check_pressed(vk_enter))
+        {
+            if (menuSelected &lt; 0)
+            {
+                room_goto(rm_car);
+            }
+            else if (menuSelected &gt; 0)
+            {
+                room_goto(rm_walk);
+            }
+        }
+        
+        // Update menu animation
+        if (menuAnimT &lt; 1.0)
+        {
+            menuAnimT += 1.0 / room_speed;
+        }
+        else
+        {
+            menuAnimT = 1.0;
+            menuShowCtr = min(lerp(menuShowCtr, 1.2, 0.05), 1.0);
+        }
+        
+        // menu division animation
+        var _powt = power(menuAnimT, 3);
+        menuDivPercent = lerp(menuDivPercent, 0.5 - menuSelected * 0.5, _powt);
+        break;
+}
 /*
 if (keyboard_check_pressed(ord('1')))
 {
@@ -107,11 +319,6 @@ if (keyboard_check_pressed(ord('1')))
     room_goto(rm_car);
 }
 */
-
-if (keyboard_check_pressed(vk_anykey))
-{
-    room_goto(rm_car);
-}
 </string>
           </argument>
         </arguments>
@@ -134,25 +341,41 @@ if (keyboard_check_pressed(vk_anykey))
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/// Draw source buffer
-var _cx = surface_get_width(surfaceSrc) / 2, _cy = surface_get_height(surfaceSrc) / 2;
-
-texture_set_interpolation(false);
-draw_set_halign(1); draw_set_valign(1);
-
-surface_set_target(surfaceSrc);
-
-draw_clear_alpha(0,0);
-// draw_set_font(fntMenuSmall);
-draw_set_font(fntMenuTiny);
-var _str = "타노스 호버보드#타노스 호버보드™";//"zik's#PIZZACRYPT™";
-draw_text_transformed_colour(_cx + 4, _cy - 80, _str, 5, 5, 0, c_black, c_black, c_black, c_black, 1.0);
-draw_text_transformed_colour(_cx, _cy - 84, _str, 5, 5, 0, c_yellow, c_yellow, c_yellow, c_yellow, 1.0);
-draw_set_font(fntDefault);
-surface_reset_target();
-
-draw_set_halign(0); draw_set_valign(0);
-texture_set_interpolation(true);
+            <string>/// Fire shader : draw source buffer
+var _cx = surface_get_width(surfaceSrc) &gt;&gt; 1, _cy = surface_get_height(surfaceSrc) &gt;&gt; 1;
+switch (menuState)
+{
+    default:
+    case eMENU.LOGO:
+        draw_set_halign(1); draw_set_valign(1);
+        
+        surface_set_target(surfaceSrc);
+        
+        draw_clear_alpha(0,0);
+        // draw_set_font(fntMenuSmall);
+        draw_set_font(fntMenuSerif);
+        var _str = "zi k's#PI ZZACRYPT™"; // Darn. We're having severe kerning issues with the letter i :/
+        draw_text_wave_align(_cx + 1, _cy - 16, _str, 1, 1, c_black, 1.0, t, 10, 2, 4, 1, 1);
+        draw_text_wave_hsv(_cx, _cy - 16, _str, 1, 1, 255, 200, 255, 1.0, t, 10, 2, 4, 1, 1);
+        draw_set_font(fntDefault);
+        surface_reset_target();
+        
+        draw_set_halign(0); draw_set_valign(0);
+        break;
+    
+    case eMENU.SELECT:
+        surface_set_target(surfaceSrc);
+        draw_clear_alpha(0,0);
+        
+        draw_set_font(fntMenuSerif);
+        var _showstr = string_copy(menuEntryTitle, 1, menuShowCtr * string_length(menuEntryTitle));
+        draw_text_wave_align(menuEntryTitleX + 1, _cy + 17, _showstr, 1, 1, c_black, 1.0, t + 270, 4.0, 2.0, 2.0, menuEntryTextAlign, 2);
+        draw_text_wave_hsv(menuEntryTitleX, _cy + 16, _showstr, 1, 1, 0, 200, 255, 1.0, t + 270, 4.0, 2.0, 2.0, menuEntryTextAlign, 2);
+        draw_set_font(fntDefault);
+        
+        surface_reset_target();
+        break;
+}
 </string>
           </argument>
         </arguments>
@@ -173,37 +396,93 @@ texture_set_interpolation(true);
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/// Draw fire with shader
+            <string>/// Draw background
+var _winw = window_get_width(), _winh = window_get_height();
+
+switch (menuState)
+{
+    case eMENU.LOGO:
+        // draw_background_part(bg3, 0, 0, _winw, _winh, 0, 0);
+        break;
+        
+    case eMENU.SELECT:
+        draw_clear(0);
+        // draw_sprite_stretched(sprPreview, 0, 0, 0, _winw, _winh);
+        
+        // primitive time
+        var _steps = 10.0;
+        var _invsteps = 1 / _steps;
+        var _invwid = 1 / _winw;
+        var _drawx = menuDivPercent * _winw;
+        var _poff = -1, _texoff = -1;
+        
+        for (var i=0; i&lt;=_steps; i++)
+        {
+            var _osc = dsin((t + i * 2.0) * 9.0 + 42 + dtan(t * 0.5 + i * 70.1) * 8) * 24.0;
+            _px[i] = _drawx + _osc;
+            _texoff[i] = _osc * _invwid;
+        }
+        
+        // demo #1 preview picture
+        draw_primitive_begin_texture(pr_trianglefan, sprite_get_texture(sprPreview, 0));
+        draw_vertex_texture(0, 0, 1.0 - menuDivPercent, 0);
+        for (var i=0; i&lt;=_steps; i++)
+        {
+            var _percent = i * _invsteps;
+            draw_vertex_texture(_px[i], _percent * _winh, 1 + _texoff[i], _percent);
+        }
+        draw_vertex_texture(0, _winh, 1.0 - menuDivPercent, 1);
+        draw_primitive_end();
+        
+        // demo #2 preview picture
+        draw_primitive_begin_texture(pr_trianglefan, sprite_get_texture(sprPreview, 1));
+        draw_vertex_texture(_winw, 0, 1 - menuDivPercent, 0);
+        for (var i=0; i&lt;=_steps; i++)
+        {
+            var _percent = i * _invsteps;
+            draw_vertex_texture(_px[i], _percent * _winh, _texoff[i], _percent);
+        }
+        draw_vertex_texture(_winw, _winh, 1 - menuDivPercent, 1);
+        draw_primitive_end();
+        break;
+}
+
 // transfer source surface to fire buffer with white
 surface_set_target(surfaceFire);
 d3d_set_fog(true, c_white, 0, 0);
 draw_surface(surfaceSrc, 0, 0);
+draw_rectangle(0, surface_get_height(surfaceFire)-1, surface_get_width(surfaceFire), surface_get_height(surfaceFire), false);
 d3d_set_fog(false, c_white, 0, 0);
 surface_reset_target();
 
 // calculate fire
+texture_set_interpolation(true);
 surface_set_target(surfaceFire);
 shader_set(shd_fire_calc);
 
 texFire = surface_get_texture(surfaceFire);
 shader_set_uniform_f(uTextureSize, surface_get_width(surfaceFire), surface_get_height(surfaceFire)); // Texture size
 shader_set_uniform_f(uTime, t); // Time
-shader_set_uniform_f(uScrollSpeed, 4); // Fire Scroll speed
-shader_set_uniform_f(uWindStrength, 0.4); // Wind strength
-shader_set_uniform_f(uWindSpeed, 4.0); // Wind speed
+shader_set_uniform_f(uScrollSpeed, fireSpeed); // Fire Scroll speed
+shader_set_uniform_f(uWindStrength, fireWindAmp); // Wind strength
+shader_set_uniform_f(uWindSpeed, fireWindSpeed); // Wind speed
 texture_set_stage(uSource, texFire); // Source Texture of surfFire
 
 draw_surface(surfaceFire, 0, 0);
 
 shader_reset();
 surface_reset_target();
+texture_set_interpolation(false);
 
-draw_clear(0);
+// draw fire
+draw_set_blend_mode(bm_add);
 shader_set(shd_fire_effect);
-draw_surface(surfaceFire, 0, 0);
+draw_surface_stretched(surfaceFire, 0, 0, _winw, _winh);
 shader_reset();
+draw_set_blend_mode(bm_normal);
 
-draw_surface(surfaceSrc, 0, 0);
+draw_surface_stretched(surfaceSrc, 0, 0, _winw, _winh);
+
 </string>
           </argument>
         </arguments>
@@ -224,14 +503,72 @@ draw_surface(surfaceSrc, 0, 0);
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/// Draw misc. menu
-var _cx = surface_get_width(surfaceSrc) / 2, _cy = surface_get_height(surfaceSrc) / 2;
+            <string>/// Draw foreground / menu
+var _cx = window_get_width() / 2, _cy = window_get_height() / 2;
+var _rainbow = make_color_hsv(t * 10, 82, 255);
 
-draw_set_halign(1); draw_set_valign(1);
-draw_text(_cx, _cy + 50, "(WORKING TITLE)");
-//draw_text_colour(_cx, _cy + 140, "Press...#&gt; 1 for top down stuff#&gt; 2 for 3D stuff", c_yellow, c_yellow, c_yellow, c_yellow, 1.0);
-draw_text_colour(_cx, _cy + 160, "Press any key I guess", c_yellow, c_yellow, c_yellow, c_yellow, 1.0);
-draw_set_halign(0); draw_set_valign(0);
+switch (menuState)
+{
+    case eMENU.LOGO:
+        draw_set_font(fntMenuTiny);
+        draw_set_halign(1); draw_set_valign(2);
+        draw_text(_cx, _cy * 2 - 10, "(Warning : This is not a game)");
+        //draw_text_colour(_cx, _cy + 140, "Press...#&gt; 1 for top down stuff#&gt; 2 for 3D stuff", c_yellow, c_yellow, c_yellow, c_yellow, 1.0);
+        // draw_text_colour(_cx, _cy + 160, "Press any key I guess", c_yellow, c_yellow, c_yellow, c_yellow, 1.0);
+        draw_set_halign(0); draw_set_valign(0);
+        draw_text_wave_hsv(_cx, _cy + 160, "Press any key I guess", 2, 2, 0, 255, 255, 1.0, t, 10.0, 16.0, 5.0, 1, 1);
+        break;
+    case eMENU.SELECT:
+        draw_set_font(fntMenuTiny);
+        
+        draw_text_wave_hsv(_cx, 42, "LEFT / RIGHT ARROW TO SELECT", 2, 2, 0, 128, 255, 1.0, t, 3.5, 4.0, 3.0, 1, 1);
+        
+        var _showstr = string_copy(menuEntryDesc, 1, menuShowCtr * string_length(menuEntryDesc));
+        
+        draw_text_wave_align(menuEntryDescX + 4.0, _cy + 68, _showstr, 2, 2, c_black, 1.0, t + 180, 2.0, 3.0, 3.0, menuEntryTextAlign, 0);
+        draw_text_wave_align(menuEntryDescX, _cy + 64, _showstr, 2, 2, _rainbow, 1.0, t + 180, 2.0, 3.0, 3.0, menuEntryTextAlign, 0);
+        break;
+}
+
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Draw transition
+var _winw = window_get_width(), _winh = window_get_height();
+
+if (menuTransition)
+{
+    var _lerp = menuTransitionCtr / menuTransitionTime;
+    
+    if (menuTransitionIn)
+    {
+        var _alpha = power(_lerp, 3);
+        draw_sprite_part_ext(sprBlank, 0, 0.5, 0.5, 1, 1, 0, 0, _winw, _winh, c_black, _alpha);
+    }
+    else
+    {
+        var _alpha = power(1 - _lerp, 3);
+        draw_sprite_part_ext(sprBlank, 0, 0.5, 0.5, 1, 1, 0, 0, _winw, _winh, c_black, _alpha);
+    }
+}
+
 </string>
           </argument>
         </arguments>

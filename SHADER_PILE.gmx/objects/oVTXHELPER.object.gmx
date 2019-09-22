@@ -26,6 +26,8 @@
           <argument>
             <kind>1</kind>
             <string>/// Vertex buffer controller object
+time = 0;
+
 model = d3d_model_create();
 vbuffStatic = vertex_create_buffer();
 vertex_format_begin();
@@ -60,15 +62,24 @@ modelFlagUpdated = false;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/// setup texture atlas
-var _sprNum1 = sprite_get_number(tex3D), _sprNum2 = sprite_get_number(tex3DParticle);
-var _sprWid = sprite_get_width(tex3D), _sprHei = sprite_get_height(tex3D);
-var surf = surface_create((_sprNum1 + _sprNum2) * _sprWid, _sprHei);
+            <string>/// setup texture atlas (warning : magic numbers galore)
+define_tex_idx();
+
+var _len = array_height_2d(global.textureList);
+var _sprNum = global.textureList[@ _len-1, 1] + global.textureList[@ _len-1, 2];
+var _sprWid = 32, _sprHei = 32, _texIdx;
+var surf = surface_create(_sprNum * _sprWid, _sprHei);
+
 surface_set_target(surf);
-for (var i=0; i&lt;_sprNum1; i++)
-    draw_sprite(tex3D, i, i * _sprWid, 0);
-for (var i=0; i&lt;_sprNum2; i++)
-    draw_sprite(tex3DParticle, i, _sprNum1 * _sprWid + i * _sprWid, 0);
+for (var i=0; i&lt;array_height_2d(global.textureList); i++)
+{
+    // show_debug_message("SPR : " + string(sprite_get_name(global.textureList[@ i, 0])) + " OFF : " + string(global.textureList[@ i, 1]) + " LEN : " + string(global.textureList[@ i, 2]));
+    for (var j=0; j&lt;global.textureList[@ i, 2]; j++)
+    {
+        _texIdx = global.textureList[@ i, 1] + j;
+        draw_sprite(global.textureList[@ i, 0], j, _texIdx * _sprWid, 0);
+    }
+}
 surface_reset_target();
 
 // immortalize the texture atlas by making it into sprite
@@ -81,6 +92,56 @@ global.textureAtlasTexHei = _sprHei;
 global.textureAtlasUnitWid = _sprWid * global.textureAtlasWid;
 
 surface_free(surf);
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Setup shaders
+shFadeResolution = shader_get_uniform(shd_3d_fade, "uScreenSize");
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="1" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>d3d_model_destroy(modelFlag);
+d3d_model_destroy(model);
+vertex_format_delete(vfmt);
+vertex_delete_buffer(vbuffStatic);
+
+sprite_delete(global.textureSpr);
 </string>
           </argument>
         </arguments>
@@ -129,7 +190,7 @@ if (!modelFlagUpdated)
     d3d_model_primitive_begin(_mdl, pr_trianglelist);
     with (oFlag)
     {
-        d3d_model_wall(_mdl, x - sizeX, y - sizeY, z, x + sizeX, y + sizeY, 0, 1, 1);
+        d3d_model_wall(_mdl, x, y, z, x + sizeX, y + sizeY, 0, 1, 1);
         //mdl_add_wall(modelFlag, x - sizeX, y - sizeY, 0, sizeX * 2.0, sizeY * 2.0, -z, texIdx, c_white, 1.0);
     }
     d3d_model_primitive_end(_mdl);
@@ -155,6 +216,9 @@ if (!modelFlagUpdated)
           <argument>
             <kind>1</kind>
             <string>/// Prepare vertex buffer
+//time++;
+var _alpha = 1.0; // billboards alpha //(dsin(time * 5) * 0.5 + 0.5);
+
 var _mdl = model;
 var _camx = 0, _camy = 0, _camanglecos = 0, _camanglesin = 0;
 var _camfov = 45;
@@ -169,9 +233,10 @@ with (oKNT_3DDEMO)
     _camfov = fov * 0.5;
 }
 
-// Draw billboarded sprites
 d3d_model_clear(_mdl);
 d3d_model_primitive_begin(_mdl, pr_trianglelist);
+
+// Draw billboarded sprites
 with (oVTXSPR)
 {
     /*
@@ -190,17 +255,32 @@ with (oVTXSPR)
     if (_anglediff &lt; _camfov + radius)
     {
         var _offx = _diry * -size, _offy = _dirx * size;
-        if (drawShadow) mdl_add_floor(_mdl, x - size, y - size, 0.0, size * 2.0, size * 2.0, 0.0, 3, c_white, 1.0);
-        mdl_add_wall(_mdl, x - _offx, y - _offy, z + size, _offx * 2.0, _offy * 2.0, size * 2.0, texIdx, c_white, 1.0);
+        if (drawShadow) mdl_add_floor(_mdl, x - size, y - size, 0, size * 2, size * 2, 0, 0, c_white, 1.0);
+        mdl_add_wall(_mdl, x - _offx, y - _offy, z + size, _offx * 2, _offy * 2, size * 2, texIdx, c_white, _alpha);
     }
+}
+
+// Draw car
+with (oPlayer)
+{
+    mdl_add_floor_rot(_mdl, x, y, 0, size, rotation, texIdx + 4, 1, 1);
+    mdl_add_floor_rot(_mdl, x, y, z, size, rotation, texIdx + 3, c_white, 1);
+    
+    var _offx = rotationSin * -size, _offy = rotationCos * size;
+    mdl_add_wall(_mdl, x - _offx, y - _offy, z + size * 2, _offx * 2, _offy * 2, size * 2, texIdx + 1 + facing, c_white, _alpha);
 }
 d3d_model_primitive_end(_mdl);
 
 // submit sprites &amp; world mesh
 vertex_submit(vbuffStatic, pr_trianglelist, global.textureAtlas);
+
+// set fade shader and uniform
+shader_set(shd_3d_fade);
+shader_set_uniform_f(shFadeResolution, window_get_width(), window_get_height());
+
 d3d_model_draw(modelFlag, 0, 0, 0, sprite_get_texture(texFlag, 0)); // Draw flag (exceptional case of drawing stuff)
 d3d_model_draw(model, 0, 0, 0, global.textureAtlas);
-//vertex_submit(vbuff, pr_trianglelist, global.textureAtlas);
+shader_reset();
 </string>
           </argument>
         </arguments>

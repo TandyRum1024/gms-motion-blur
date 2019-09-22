@@ -78,6 +78,8 @@ vz = 0;
 vr = 0;
 
 draw_set_alpha_test(true);
+draw_set_alpha_test_ref_value(0);
+d3d_set_zwriteenable(true);
 d3d_set_culling(false);
 </string>
           </argument>
@@ -93,7 +95,7 @@ d3d_set_culling(false);
         <exetype>2</exetype>
         <functionname></functionname>
         <codestring></codestring>
-        <whoName>other</whoName>
+        <whoName>self</whoName>
         <relative>0</relative>
         <isnot>0</isnot>
         <arguments>
@@ -102,17 +104,25 @@ d3d_set_culling(false);
             <string>/// Set shader
 time = 0;
 application_surface_draw_enable(false);
+
+shakeEnabled = true;
 motionblurEnabled = true;
+motionblurStrength = 1.0;
+motionblurBaseVX = 0;
+motionblurBaseVY = 0;
+motionblurBaseVZ = 0;
+motionblurBaseVR = 0;
 
 /// Shader related stuff
 texBlueNoise = sprite_get_texture(texBluenoise64, 0);
 
 // motionblur : camera velocity [xvel, yvel, zoomvel]
-shMotionblurNoise = shader_get_sampler_index(sh_motionblur_fullscreen, "sNoise");
-shMotionblurVel = shader_get_uniform(sh_motionblur_fullscreen, "uVelocity");
-shMotionblurStr = shader_get_uniform(sh_motionblur_fullscreen, "uStrength");
-shMotionblurTime = shader_get_uniform(sh_motionblur_fullscreen, "uTime");
-shMotionblurTexsize = shader_get_uniform(sh_motionblur_fullscreen, "uTexsize");
+shMotionblurNoise = shader_get_sampler_index(sh_motionblur_fullscreen_clearcenter, "sNoise");
+shMotionblurVel = shader_get_uniform(sh_motionblur_fullscreen_clearcenter, "uVelocity");
+shMotionblurStr = shader_get_uniform(sh_motionblur_fullscreen_clearcenter, "uStrength");
+shMotionblurTime = shader_get_uniform(sh_motionblur_fullscreen_clearcenter, "uTime");
+shMotionblurTexsize = shader_get_uniform(sh_motionblur_fullscreen_clearcenter, "uTexsize");
+shMotionblurNoisesize = shader_get_uniform(sh_motionblur_fullscreen_clearcenter, "uNoisesize");
 // shMotionblurTex = shader_get_sampler_index(sh_motionblur_linear, "sTex");
 // shMotionblurTexinfo = shader_get_uniform(sh_motionblur_linear, "uTexinfo");
 
@@ -149,6 +159,67 @@ viewmodelShakeCtr = 0; // Counter for viewmodel shaking
 viewmodelShockCtr = 0; // Counter for viewmodel showing ""shocked"" face
 viewmodelFacing = 0; // Viewmodel facing direction. -1 = left, 0 = forward, 1 = right
 viewmodelSpr = 0;
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// UI init
+iui_init();
+uiShow = false;
+
+uiBlurEnabled = true;
+uiShakeEnabled = true;
+
+uiBlurStrength = "1";
+uiBlurVX = "0";
+uiBlurVY = "0";
+uiBlurVZ = "0";
+uiBlurVR = "0";
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="1" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>show_debug_message("DESTROY");
+draw_set_alpha_test(false);
+d3d_set_culling(false);
+d3d_set_projection_ortho(0,0,window_get_width(),window_get_height(),0);
+d3d_end();
+
+application_surface_draw_enable(true);
 </string>
           </argument>
         </arguments>
@@ -271,10 +342,11 @@ viewmodelvelr *= 0.9;
           <argument>
             <kind>1</kind>
             <string>/// Update camera motion
-vr -= clamp(camR * 0.01, -6.0, 6.0);
-vx -= clamp(camX * 0.3, -6.0, 6.0);
-vy -= clamp(camY * 0.3, -6.0, 6.0);
-vz -= clamp(camZ * 0.3, -6.0, 6.0);
+// update velocity
+vr -= clamp(camR * 0.05, -6.0, 6.0);
+vx -= clamp(camX * 0.2, -6.0, 6.0);
+vy -= clamp(camY * 0.2, -6.0, 6.0);
+vz -= clamp(camZ * 0.2, -6.0, 6.0);
 
 camR += vr;
 camX += vx;
@@ -282,39 +354,9 @@ camY += vy;
 camZ += vz;
 
 vr *= 0.9;
-vx *= 0.92;
-vy *= 0.92;
-vz *= 0.92;
-</string>
-          </argument>
-        </arguments>
-      </action>
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <isquestion>0</isquestion>
-        <useapplyto>-1</useapplyto>
-        <exetype>2</exetype>
-        <functionname></functionname>
-        <codestring></codestring>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>/// Toggle stuff
-if (keyboard_check_pressed(ord("1")))
-{
-    motionblurEnabled = !motionblurEnabled;
-}
-
-if (instance_exists(oThanosCar) &amp;&amp; keyboard_check_pressed(ord("2")))
-{
-    oThanosCar.shakeEnabled = !oThanosCar.shakeEnabled;
-}
+vx *= 0.9;
+vy *= 0.9;
+vz *= 0.9;
 </string>
           </argument>
         </arguments>
@@ -352,6 +394,144 @@ if (viewmodelShakeCtr &gt; 0)
     viewmodelShakeCtr--;
 else
     viewmodelShakeCtr = 0;
+    
+// update viewmodel motion
+viewmodelx = -camX * 0.5;
+viewmodely = -camY * 0.5 - 32 + vfwd * 4.0;
+viewmodelr = camR + lookR;
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Tone down blur strength gradually
+motionblurStrength = lerp(motionblurStrength, 1.0, 0.6);
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Exit check
+if (keyboard_check_pressed(vk_escape))
+{
+    room_goto(rm_menu);
+}
+
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Update UI
+iui_update_io();
+iui_inputX = window_mouse_get_x();
+iui_inputY = window_mouse_get_y();
+
+if (keyboard_check_pressed(vk_f1))
+{
+    uiShow = !uiShow;
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Update player side shake variable
+if (instance_exists(oPlayer))
+{
+    oPlayer.shakeEnabled = shakeEnabled;
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="7" enumb="5">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>show_debug_message("END");
+draw_set_alpha_test(false);
+d3d_set_culling(false);
+d3d_set_projection_ortho(0,0,window_get_width(),window_get_height(),0);
+d3d_end();
+
+application_surface_draw_enable(true);
+
+iui_destroy();
 </string>
           </argument>
         </arguments>
@@ -380,10 +560,11 @@ if (motionblurEnabled)
 {
     // Draw screen pass with motion blur (with interpolation on)
     texture_set_interpolation(true);
-    shader_set(sh_motionblur_fullscreen);
+    shader_set(sh_motionblur_fullscreen_clearcenter);
     
     // surface size / texture size
     shader_set_uniform_f(shMotionblurTexsize, surface_get_width(application_surface), surface_get_height(application_surface));
+    shader_set_uniform_f(shMotionblurNoisesize, 1 / texture_get_texel_width(texBlueNoise), 1 / texture_get_texel_height(texBlueNoise));
     
     // blur info
     time++;
@@ -392,9 +573,8 @@ if (motionblurEnabled)
     // remap the velocity so that subtle movements doesn't make a lot of blur
     var _vf = min(max(0, abs(vfwd) - 4.0) / 16.0, 1.0);
     
-    shader_set_uniform_f(shMotionblurVel, vrh + vx, vrv + vz, _vf, -vrr - vr); // set camera velocities
-    shader_set_uniform_f(shMotionblurStr, 4.0, 0.5, 0.0); // motion blur OFF
-    //shader_set_uniform_f(shMotionblurStr, 4.0, 0.5, 1.0); // set motion blur strength
+    shader_set_uniform_f(shMotionblurVel, motionblurBaseVX + vrh + vx, motionblurBaseVY + vrv + vz, motionblurBaseVZ + _vf, motionblurBaseVR + -vrr - vr); // set camera velocities
+    shader_set_uniform_f(shMotionblurStr, motionblurStrength, max(0.4, 0.5 * motionblurStrength), 2.0 * motionblurStrength); // set motion blur strength
     
     // draw screen pass
     draw_surface(application_surface, 0, 0);
@@ -426,30 +606,31 @@ else
           <argument>
             <kind>1</kind>
             <string>/// viewmodel / HUD
+/*
 var _hudx = window_get_width() &gt;&gt; 1, _hudy = window_get_height() - 21;
+var _drawx = _hudx + viewmodelx + random_range(-viewmodelShakeCtr, viewmodelShakeCtr), _drawy = _hudy + viewmodely + random_range(-viewmodelShakeCtr, viewmodelShakeCtr);
+var _drawr = viewmodelr + random_range(-viewmodelShakeCtr, viewmodelShakeCtr) * 0.8;
+
 var _colour = make_colour_hsv(time * 2.0, 255, 255); // rainbow colour
 
-/// Viewmodel
-var _vsx = random_range(-viewmodelShakeCtr, viewmodelShakeCtr), _vsy = random_range(-viewmodelShakeCtr, viewmodelShakeCtr), _vsr = random_range(-viewmodelShakeCtr, viewmodelShakeCtr) * 0.8;
-var _vmx = _hudx + random_range(-viewmodelShakeCtr, viewmodelShakeCtr), _vmy = window_get_height() - 21 + viewmodely;
-draw_sprite_ext(sprViewThanno, viewmodelSpr, _vmx + _vsx, _vmy + _vsy, viewmodelScale, viewmodelScale, _vsr, c_white, 1);
+/// Sprite
+draw_sprite_ext(sprViewThanno, viewmodelSpr, _drawx, _drawy, viewmodelScale, viewmodelScale, _drawr, c_white, 1);
 
-/// HUD
+/// Text
 // calculate metre per second
 var _metreperframe = vfwd / 8;
 var _mph = _metreperframe * 26.8224;
-
-var _t = _mph * 0.5 + 1.0; // animation time
 var _hudstr = string(_mph) + " MPH";
-var _hudrot = dsin(_t * 2.0) * 5 + dcos(_t * 4.5 + 42.0) * 2 + dsin(_t * 10.0 + 84.0) * 1.2;
-var _hudscale = viewmodelScale * 0.5;
+var _strscale = viewmodelScale * 0.5;
+var _viewmodelOffx = 21 * viewmodelScale;
 
-draw_set_halign(1); draw_set_valign(1);
-draw_set_font(fntMenuTiny);
-draw_text_transformed_colour(_hudx + viewmodelx + 2, _hudy + viewmodely + 2, _hudstr, _hudscale, _hudscale, viewmodelr + _hudrot, c_black, c_black, c_black, c_black, 1.0);
-draw_text_transformed_colour(_hudx + viewmodelx, _hudy + viewmodely, _hudstr, _hudscale, _hudscale, viewmodelr + _hudrot, _colour, _colour, _colour, _colour, 1.0);
+draw_set_halign(0); draw_set_valign(2);
+draw_set_font(fntComicSans);
+draw_text_transformed_colour(_drawx + _viewmodelOffx + 2, _drawy, _hudstr, _strscale, _strscale, _drawr, c_black, c_black, c_black, c_black, 1.0);
+draw_text_transformed_colour(_drawx + _viewmodelOffx, _drawy, _hudstr, _strscale, _strscale, _drawr, _colour, _colour, _colour, _colour, 1.0);
 draw_set_font(fntDefault);
 draw_set_halign(0); draw_set_valign(0);
+*/
 </string>
           </argument>
         </arguments>
@@ -472,41 +653,75 @@ draw_set_halign(0); draw_set_valign(0);
             <kind>1</kind>
             <string>/// Draw FPS counter &amp; info
 var _wid = window_get_width() - 10;
-var _infoy = 10, _infostr = "FPS : " + string(fps_real), _infocol = c_yellow;
+var _cx = window_get_width() * 0.5;
 
-// draw fps
-draw_set_font(fntDefault);
-draw_text_colour(10 + 2, _infoy + 2, _infostr, c_black, c_black, c_black, c_black, 1.0);
-draw_text_colour(10, _infoy, _infostr, _infocol, _infocol, _infocol, _infocol, 1.0);
-
-// draw info
-_infoy += 30;
-if (motionblurEnabled)
+draw_set_font(fntMenuTiny);
+if (uiShow)
 {
-    _infostr = "Press [1] to toggle Motion blur! (Blur : ON)";
-    _infocol = c_lime;
+    iui_begin();
+    
+    draw_set_halign(0);
+    
+    // backdrop
+    var _uilabel = $9cd6fc;
+    var _uiheight = 150;
+    iui_rect(0, 0, _cx * 2, _uiheight, $212020);
+    iui_rect(0, _uiheight, _cx * 2, 2, c_black);
+    iui_label_shadow(10, _uiheight + 2, "^ Debug menu! Press &lt;F1&gt; to hide.", _uilabel, 1, 1, 0);
+    
+    var _uiy = 24;
+    iui_label_shadow(10, _uiy, "BLUR STRENGTH", _uilabel, 1, 1, 0);
+    uiBlurStrength = iui_textbox_numberonly(10, _uiy + 24, 80, 24, uiBlurStrength, "#3D_STR");
+    
+    iui_label_shadow(200, _uiy, "MOTION BLUR", _uilabel, 1, 1, 0);
+    uiBlurEnabled = iui_checkbox(200, _uiy + 24, 24, 24, uiBlurEnabled, "#3D_ENABLED");
+    
+    iui_label_shadow(400, _uiy, "CAMERA SHAKE", _uilabel, 1, 1, 0);
+    uiShakeEnabled = iui_checkbox(400, _uiy + 24, 24, 24, uiShakeEnabled, "#3D_SHAKE");
+    
+    _uiy += 64;
+    iui_label_shadow(10, _uiy, "X Vel.", _uilabel, 1, 1, 0);
+    uiBlurVX = iui_textbox_numberonly(10, _uiy + 24, 80, 24, uiBlurVX, "#3D_VX");
+    
+    iui_label_shadow(100, _uiy, "Y Vel.", _uilabel, 1, 1, 0);
+    uiBlurVY = iui_textbox_numberonly(100, _uiy + 24, 80, 24, uiBlurVY, "#3D_VY");
+    
+    iui_label_shadow(200, _uiy, "Zoom Vel.", _uilabel, 1, 1, 0);
+    uiBlurVZ = iui_textbox_numberonly(200, _uiy + 24, 80, 24, uiBlurVZ, "#3D_VZ");
+    
+    iui_label_shadow(300, _uiy, "Rot. Vel.", _uilabel, 1, 1, 0);
+    uiBlurVR = iui_textbox_numberonly(300, _uiy + 24, 80, 24, uiBlurVR, "#3D_VR");
+    
+    if (iui_kbFocusItem != -1)
+    {
+        motionblurStrength = real(uiBlurStrength);
+    }
+    else
+    {
+        uiBlurStrength = string(motionblurStrength);
+    }
+    
+    motionblurBaseVX = real(uiBlurVX);
+    motionblurBaseVY = real(uiBlurVY);
+    motionblurBaseVZ = real(uiBlurVZ);
+    motionblurBaseVR = real(uiBlurVR);
+    
+    motionblurEnabled = uiBlurEnabled;
+    shakeEnabled = uiShakeEnabled;
+    iui_end();
 }
 else
 {
-    _infostr = "Press [1] to toggle Motion blur! (Blur : OFF)";
-    _infocol = c_yellow;
+    var _infoy = 10, _infostr = "&lt;ARROW KEY&gt; to move#&lt;F1&gt; for debug menu", _infocol = c_yellow;
+    
+    draw_set_halign(1);
+    draw_text_colour(_cx + 2, _infoy + 2, _infostr, 0, 0, 0, 0, 1.0);
+    draw_text_colour(_cx, _infoy, _infostr, _infocol, _infocol, _infocol, _infocol, 1.0);
 }
-draw_text_transformed_colour(10 + 2, _infoy + 2, _infostr, 0.8, 0.8, 0, c_black, c_black, c_black, c_black, 1.0);
-draw_text_transformed_colour(10, _infoy, _infostr, 0.8, 0.8, 0, _infocol, _infocol, _infocol, _infocol, 1.0);
 
-_infoy += 30;
-if (instance_exists(oThanosCar) &amp;&amp; oThanosCar.shakeEnabled)
-{
-    _infostr = "Press [2] to toggle Camera shake (Shake : ON)";
-    _infocol = c_lime;
-}
-else
-{
-    _infostr = "Press [2] to toggle Camera shake (Shake : OFF)";
-    _infocol = c_yellow;
-}
-draw_text_transformed_colour(10 + 2, _infoy + 2, _infostr, 0.8, 0.8, 0, c_black, c_black, c_black, c_black, 1.0);
-draw_text_transformed_colour(10, _infoy, _infostr, 0.8, 0.8, 0, _infocol, _infocol, _infocol, _infocol, 1.0);
+draw_set_halign(0);
+draw_text_colour(11, 11, "FPS : " + string(fps_real), 0, 0, 0, 0, 1.0);
+draw_text_colour(10, 10, "FPS : " + string(fps_real), c_yellow, c_yellow, c_yellow, c_yellow, 1.0);
 </string>
           </argument>
         </arguments>
@@ -570,15 +785,7 @@ var _xoff = camX * _lookcos2 - camY * _looksin2;
 var _yoff = camX * _looksin2 + camY * _lookcos2;
 
 d3d_start();
-d3d_set_projection_ext(x + _xoff, y + _yoff, z + camZ, _targetx + _xoff, _targety + _yoff, _targetz + camZ, _xup, _yup, _zup, fov, aspect, 0.01, 6666);
-//d3d_set_projection_ext(x, y, z, _targetx, _targety, _targetz, _rollx, _rolly, _rollz, fov, aspect, 0.01, 6666);
-/*
-var _pmat;
-var _lookmat = matrix_build(0,0,0, lookV, lookH, lookR, 1,1,1);
-var _lookmat = matrix_build(0,0,0, lookV, lookH, lookR, 1,1,1);
-
-matrix_set(matrix_projection, _pmat);
-*/
+d3d_set_projection_ext(x + _xoff, y + _yoff, z + camZ, _targetx + _xoff, _targety + _yoff, _targetz + camZ, _xup, _yup, _zup, fov, aspect, 0.1, 2048);
 </string>
           </argument>
         </arguments>
@@ -602,7 +809,7 @@ matrix_set(matrix_projection, _pmat);
           <argument>
             <kind>1</kind>
             <string>/// Draw sky
-var _dist = 5000;
+var _dist = 2000;
 d3d_draw_cylinder(x - _dist, y - _dist, z + _dist, x + _dist, y + _dist, z - _dist, sprite_get_texture(tex3DBG, 0), 1, 1, true, 64);
 d3d_draw_floor(-6400, -6400, -4, 6400, 6400, -4, sprite_get_texture(texFloor, 1), 200, 200);
 </string>

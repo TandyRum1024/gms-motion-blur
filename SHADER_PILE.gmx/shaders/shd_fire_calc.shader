@@ -147,8 +147,8 @@ float neighborSmoke (sampler2D src, vec2 uv)
 // Function to get the wind value for offseting the sampling UV
 vec2 windmap2D (vec2 uv, float time, float strength)
 {
-    float windx = noise(uv * 5.0 + vec2(time)) + (sin(uv.y * 16.0 + 21.0 + uv.x * 21.0 + time) + sin(time + uv.x * 32.0 + 0.42)) * strength;
-    float windy = noise(uv * 5.0 + vec2(time)) + (cos(uv.x * 16.0 + 21.0 + uv.y * 2.0 + time) + sin(uv.y * 32.0 + time + 0.24 + cos(uv.x * 2.0 + time) * 1.0) * 0.5) * strength;
+    float windx = fbm(uv * 5.0 + vec2(time)) + (sin(uv.y * 16.0 + 21.0 + uv.x * 21.0 + time) + sin(time + uv.x * 32.0 + 0.42)) * strength;
+    float windy = fbm(uv * 5.0 + vec2(time)) + (cos(uv.x * 16.0 + 21.0 + uv.y * 2.0 + time) + sin(uv.y * 32.0 + time + 0.24 + cos(uv.x * 2.0 + time) * 1.0) * 0.5) * strength;
     
     return vec2((windx - 0.5), (windy - 0.5)) * 0.001;
 }
@@ -186,8 +186,9 @@ void main()
         coolmap *= coolmap;
         coolmap *= 0.75;
     #else
-        // float coolmapRaw = fbm((vec2(v_vTexcoord.x, fireY) + flowmap) * 40.0);
-        float coolmapRaw = getVoronoi(vec2(v_vTexcoord.x, fireY), flowmap * 10.0, 20.0, u_time * 0.1);
+        //float coolmapRaw = fbm((vec2(v_vTexcoord.x, fireY) + flowmap) * 40.0);
+        float coolmapRaw = fbm((vec2(v_vTexcoord.x, fireY) + flowmap) * 30.0);
+        //float coolmapRaw = getVoronoi(vec2(v_vTexcoord.x, fireY), flowmap * 10.0, 20.0, u_time * 0.1);
         
         // Adjust cooling map
         float coolmap = smoothstep(0.0, 1.0, coolmapRaw * coolmapRaw);
@@ -204,7 +205,7 @@ void main()
         ==============
     */
     #ifdef RENDER_SMOKE
-        const float smokeMultiplier = 2.5;
+        const float smokeMultiplier = 1.5;
         vec2 uvSmoke = uvFire + vec2(0.0, v_pixelsize.y * smokeMultiplier);
         
         #ifdef USE_WINDMAP
@@ -224,7 +225,8 @@ void main()
             coolmap *= 0.75;
         #else
             // coolmapRaw = fbm((vec2(v_vTexcoord.x, smokeY) + (flowmap * smokeMultiplier)) * 15.0);
-            coolmapRaw = getVoronoi(vec2(v_vTexcoord.x, smokeY), flowmap * smokeMultiplier * 10.0, 5.0, u_time * 2.0);
+            // coolmapRaw = getVoronoi(vec2(v_vTexcoord.x, smokeY), flowmap * smokeMultiplier * 10.0, 5.0, u_time * 2.0);
+            coolmapRaw = fbm((vec2(v_vTexcoord.x, smokeY) + flowmap) * smokeMultiplier * 30.0);
             
             // Adjust cooling map
             coolmap = smoothstep(0.0, 1.0, coolmapRaw * coolmapRaw);

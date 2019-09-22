@@ -27,14 +27,12 @@ varying vec4 v_vColour;
 
 void main()
 {
-    // 255, 152, 56
-    const vec4 colorCore = vec4(RGB(255, 152, 56), 1.0);
-    // 255, 84, 0
-    const vec4 colorMid = vec4(RGB(255, 84, 41), 1.0);
+    const vec4 colorCore = vec4(RGB(255, 171, 74), 1.0);
+    const vec4 colorFire = vec4(RGB(255, 91, 41), 1.0);
     
-    // 99, 9, 0
-    const vec4 colorSmokeA = vec4(RGB(15, 15, 15), 0.0);
-    const vec4 colorSmokeB = vec4(RGB(56, 53, 54), 0.8);
+    const vec4 colorSmokeCore = vec4(RGB(87, 88, 94), 0.5);
+    const vec4 colorSmoke = vec4(RGB(34, 35, 36), 0.4);
+    const vec4 colorSmokeEdge = vec4(RGB(34, 35, 36), 0.0);
     
     vec4 composite = vec4(0.0);
     vec4 source = texture2D( gm_BaseTexture, v_vTexcoord );
@@ -43,20 +41,26 @@ void main()
     
     // Step gradient from
     // https://stackoverflow.com/questions/15935117/how-to-create-multiple-stop-gradient-fragment-shader
-    float stepLow = 0.0;
-    float stepMidStart = 0.35;
-    float stepMidEnd = 0.95;
-    float stepHigh = 1.0;
+    float stepSmokeEnd = 0.1;
+    float stepSmokeBegin = 0.35;
+    float stepSmokeCoreEnd = 0.50;
+    float stepSmokeCoreBegin = 0.95;
+    
+    float stepFireEnd = 0.01;
+    float stepFireBegin = 0.45;
+    float stepFireCoreEnd = 0.70;
+    float stepFireCoreBegin = 0.85;
     
     // Smoke
-    vec4 smokeFinal = mix(colorSmokeA, colorSmokeB, lumSmoke);
+    vec4 smokeFinal = mix(colorSmokeEdge, colorSmoke, smoothstep(stepSmokeEnd, stepSmokeBegin, lumSmoke));
+    smokeFinal = mix(smokeFinal, colorSmokeCore, smoothstep(stepSmokeCoreEnd, stepSmokeCoreBegin, lumSmoke));
+    // vec4 smokeFinal = mix(colorSmokeEdge, colorSmokeCore, lumSmoke);
     
     // Fire
-    // composite = mix(smokeFinal, colorAmber, smoothstep(stepLow, stepMidStart, lumFire));
-    composite = mix(smokeFinal, colorMid, smoothstep(stepMidStart, stepMidEnd, lumFire));
-    composite = mix(composite, colorCore, smoothstep(stepMidEnd, stepHigh, lumFire));
+    composite = mix(smokeFinal, colorFire, smoothstep(stepFireEnd, stepFireBegin, lumFire));
+    composite = mix(composite, colorCore, smoothstep(stepFireCoreEnd, stepFireCoreBegin, lumFire));
     
     // gl_FragColor = v_vColour * clamp(smokeFinal + composite, 0.0, 1.0);
-    gl_FragColor = v_vColour * composite;
+    gl_FragColor = v_vColour * clamp(composite, 0.0, 1.0);
     // gl_FragColor = vec4(vec3(texture2D( gm_BaseTexture, v_vTexcoord ).r), 1.0);
 }

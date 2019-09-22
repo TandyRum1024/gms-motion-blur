@@ -35,7 +35,7 @@ sizeY = size * image_yscale;
 
 radius = size;//max(sizeX, sizeY); // culling radius
 
-texIdx = 2;
+texIdx = 1;
 repeatX = sizeX div size;
 repeatY = sizeY div size;
 </string>
