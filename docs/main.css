@@ -1,0 +1,246 @@
+@font-face { font-family: 'Sam3KRFont'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_eight@1.0/Sam3KRFont.woff') format('woff'); font-weight: normal; font-style: normal; }
+
+/* Set body margin */
+body
+{
+    margin: 0;
+    padding: 0;
+
+    background-color: #252427;
+    color: #fff1c1;
+}
+
+/* Set link colour */
+a
+{
+    color: #94eacd;
+}
+
+a:visited
+{
+    color: #758ba5;
+}
+
+/* Aside Navigator */
+div#aside-wrapper
+{
+    position: fixed;
+
+    top: 0;
+    left: 0;
+    width: 15%;
+    height: 100%;
+    
+    background-color: #252427;
+    box-shadow: 10px -10px 20px #121213;
+}
+
+div#aside-wrapper::after
+{
+    position: fixed;
+    z-index: -1;
+
+    content: "";
+    display: block;
+
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: calc(15% + 20px);
+
+    background: linear-gradient(135deg, #252427 10px, transparent 0),
+                linear-gradient(45deg, #252427 10px, transparent 0);
+    background-position: right bottom;
+    background-repeat: repeat-y;
+    background-size: 20px 20px;
+}
+
+#aside-wrapper aside
+{
+    margin: auto;
+    padding: 0;
+    top: 0;
+    left: 0;
+    width: 80%;
+    height: 100%;
+}
+
+#aside-wrapper p
+{
+    color: #ef6e3e;
+
+    text-align: center;
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 3.0em;
+    text-shadow: 0 0.1em black;
+}
+
+#aside-wrapper li
+{
+    color: #ef6e3e;
+    
+    line-height: 1.5em;
+    font-family: 'Nanum Gothic Coding', monospace;
+    font-size: 1.3vw;
+    font-weight: bold;
+    text-shadow: 0 0.05em black;
+
+    list-style-type: lower-greek;
+}
+
+/* Contents wrapper */
+div#article-wrapper
+{
+    margin: 0 0 0 15%;
+    width: 70%;
+
+    background-color: #121213;
+    box-shadow: 0 0 32px #121213;
+}
+
+/* Contents */
+#article-wrapper article
+{
+    padding: 30px;
+
+    font-size: 1.0 em;
+    font-family: 'Nanum Gothic Coding', serif;
+}
+
+#article-wrapper footer
+{
+    text-align: center;
+    font-family: 'Bree Serif', 'Nanum Gothic Coding', serif;
+}
+
+/* Contents */
+#article-wrapper #toc-wrapper
+{
+    display: block;
+    width: 100%;
+
+    background-color: #252427;
+    border-top: 1px solid #fff1c1;
+    border-bottom: 1px solid #fff1c1;
+}
+
+#article-wrapper #toc-wrapper aside
+{
+    display: block;
+
+    margin: 0 auto 0 auto;
+    padding: 1em;
+    width: 50%;
+}
+
+#article-wrapper #toc-wrapper p
+{
+    margin: 0;
+    padding: 0;
+
+    color: #ef6e3e;
+
+    text-align: center;
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 2.5em;
+    text-shadow: 0 0.1em black;
+}
+
+#article-wrapper #toc-wrapper li
+{
+    color: #ef6e3e;
+    
+    line-height: 1.5em;
+    font-family: 'Nanum Gothic Coding', monospace;
+    font-size: 1.0em;
+    font-weight: bold;
+    text-shadow: 0 0.05em black;
+
+    list-style-type: lower-greek;
+}
+
+/* Header */
+#article-wrapper #header-wrapper
+{
+    content: "";
+    display: block;
+
+    margin: 0;
+    padding: 0;
+    padding-top: 32px;
+    padding-bottom: 32px;
+    height: 30vh;
+
+    background-color: #ef6e3e;
+}
+
+#header-wrapper #header-content-wrapper
+{
+    display: block;
+    
+    position: relative;
+    left: 50%;
+    top: 50%;
+    width: 80%;
+    transform: translate(-50%, -50%);
+
+    /* font-family: 'Times New Roman', Times, serif; */
+    text-align: center;
+
+    background-color: transparent;
+}
+
+#header-wrapper #header-content-wrapper header
+{
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 4vw;
+    
+    text-shadow: 0 0.1em black;
+}
+
+#header-wrapper #header-content-wrapper p
+{
+    font-family: 'Bree Serif', 'Nanum Gothic Coding', serif;
+    font-style: italic;
+    font-weight: bolder;
+    font-size: 1.5em;
+    text-shadow: 0 0.1em black;
+}
+
+
+@media screen and (min-width: 1300px)
+{
+    #header-wrapper #header-content-wrapper header
+    {
+       font-size: 4em;
+    }
+}
+
+/* Phone mode */
+@media screen and (max-width: 1000px)
+{
+    #header-wrapper #header-content-wrapper header
+    {
+       font-size: 4vh;
+    }
+
+    div#article-wrapper
+    {
+        margin: 0 0 0 0;
+        width: 100%;
+    }
+
+    div#aside-wrapper
+    {
+        display: none;
+    }
+}
+
+/* Title text size safenet */
+@media screen and (max-height: 700px)
+{
+    #header-wrapper #header-content-wrapper header
+    {
+       font-size: 5vh;
+    }
+}
