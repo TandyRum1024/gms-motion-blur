@@ -27,9 +27,11 @@ div#aside-wrapper
     position: fixed;
     z-index: 1;
 
+    padding: 0 1em 0 1em;
+
     top: 0;
     left: 0;
-    width: 15%;
+    width: calc(20% - 2em);
     height: 100%;
     
     background-color: #252427;
@@ -47,7 +49,7 @@ div#aside-wrapper::after
     top: 0;
     left: 0;
     height: 100%;
-    width: calc(15% + 20px);
+    width: calc(20% + 20px);
 
     background: linear-gradient(135deg, #252427 10px, transparent 0),
                 linear-gradient(45deg, #252427 10px, transparent 0);
@@ -62,7 +64,7 @@ div#aside-wrapper::after
     padding: 0;
     top: 0;
     left: 0;
-    width: 80%;
+    width: 100%;
     height: 100%;
 }
 
@@ -76,17 +78,75 @@ div#aside-wrapper::after
     text-shadow: 0 0.1em black;
 }
 
+#aside-wrapper ul
+{
+    padding: 0;
+}
+
 #aside-wrapper li
 {
     color: #ef6e3e;
     
     line-height: 1.5em;
     font-family: 'Nanum Gothic Coding', monospace;
-    font-size: 1.3vw;
+    font-size: 1.5vw;
     font-weight: bold;
     text-shadow: 0 0.05em black;
 
     list-style-type: lower-greek;
+    list-style-position: inside;
+}
+
+/* highlight */
+#aside-wrapper li.current
+{
+    position: relative;
+    color: #252427;
+}
+
+#aside-wrapper li.current a
+{
+    color: #252427;
+}
+
+#aside-wrapper li.current::before
+{
+    content: "";
+    display: block;
+    position: absolute;
+    z-index: -1;
+
+    left: 0;
+    top: 0;
+    width: calc(100% + 0.25em);
+    height: 100%;
+
+    background-color: #ffdd00;
+}
+
+#aside-wrapper li.current::marker
+{
+    display: block;
+    background-color: #ffdd00;
+}
+
+#aside-wrapper li.current::after
+{
+    content: "";
+    display: block;
+    position: absolute;
+    z-index: 1;
+
+    left: calc(100% + 0.25em);
+    top: 0;
+    width: 32px;
+    height: 100%;
+
+    background: linear-gradient(45deg, #ffdd00, 20px, transparent 0),
+                linear-gradient(135deg, #ffdd00, 20px, transparent 0);
+    background-position: top left;
+    background-size: 100%;
+    background-repeat: no-repeat;
 }
 
 /* Contents wrapper */
@@ -95,8 +155,8 @@ div#article-wrapper
     position: relative;
     z-index: 0;
 
-    margin: 0 0 0 15%;
-    width: 70%;
+    margin: 0 0 0 20%;
+    width: 60%;
 
     background-color: #121213;
     box-shadow: 0 0 32px #121213;
@@ -123,9 +183,9 @@ div#article-wrapper
     position: relative;
 
     /* margin: 2em 0 2em 0; */
-    /* padding: 0.5em 3em 0.5em 3em; */
+    padding: 0.05em 3em 0.05em 3em;
 
-    height: 100px;
+    /* height: 100px; */
 
     color: #121213;
     background-color: #ffdd00;
@@ -141,7 +201,7 @@ div#article-wrapper
     top: 0;
     left: 0;
     width: 80px;
-    height: 100px;
+    height: 100%;
 }
 
 #article-wrapper .alert #left #image
@@ -166,20 +226,16 @@ div#article-wrapper
     display: block;
 
     margin: auto 0 auto 80px;
-    width: 80%;
-    height: 80%;
+    width: auto;
 }
 
 /* Table of Contents */
 #article-wrapper #toc-wrapper
 {
-    /* display: block; */
     display: none;
     width: 100%;
 
     background-color: #252427;
-    /* border-top: 1px solid #fff1c1;
-    border-bottom: 1px solid #fff1c1; */
 }
 
 #toc-wrapper::before
@@ -316,7 +372,7 @@ div#article-wrapper
     font-family: 'Bree Serif', 'Nanum Gothic Coding', serif;
     font-style: italic;
     font-weight: bolder;
-    font-size: 1.5em;
+    font-size: 2vw;
     text-shadow: 0 0.1em black;
 }
 
@@ -327,6 +383,11 @@ div#article-wrapper
     {
        font-size: 3.5em;
     }
+
+    #header-wrapper #header-content-wrapper p
+    {
+       font-size: 1.5em;
+    }
 }
 
 /* Phone mode */
@@ -334,7 +395,12 @@ div#article-wrapper
 {
     #header-wrapper #header-content-wrapper header
     {
-       font-size: 4vh;
+       font-size: calc(3vh + 3vw);
+    }
+
+    #header-wrapper #header-content-wrapper p
+    {
+       font-size: calc(1.5vh + 1.5vw);
     }
 
     div#article-wrapper
@@ -352,11 +418,6 @@ div#article-wrapper
     {
         display: block;
     }
-
-    div#aside-wrapper
-    {
-        display: none;
-    }
 }
 
 /* Title text size safenet */
@@ -364,6 +425,11 @@ div#article-wrapper
 {
     #header-wrapper #header-content-wrapper header
     {
-       font-size: 5vh;
+       font-size: calc(2.5vh + 2.5vw);
+    }
+
+    #header-wrapper #header-content-wrapper p
+    {
+       font-size: 1.0em;
     }
 }
