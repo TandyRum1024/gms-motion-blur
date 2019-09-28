@@ -41,9 +41,32 @@
 
 .img-center
 {
-    position: relative;
+    display: block;
     margin: 0 auto 0 auto;
 }
+
+.txt-center
+{
+    text-align: center;
+}
+
+article.image-center
+{
+    text-align: center;
+    background-color: black;
+}
+/*
+article.image-center #image-list
+{
+    display: flexbox;
+    flex-direction: column;
+}
+
+html
+{
+    scroll-behavior: smooth;
+}
+*/
 
 /* Set body margin */
 body
