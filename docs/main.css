@@ -1,5 +1,50 @@
 @font-face { font-family: 'Sam3KRFont'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_eight@1.0/Sam3KRFont.woff') format('woff'); font-weight: normal; font-style: normal; }
 
+@keyframes bg-scroll-64px
+{
+    from {background-position: 0px 0px;}
+    to {background-position: 64px 64px;}
+}
+
+@keyframes bob-horizontal-90deg
+{
+    0% {transform: translateX(0px) translateY(-2px) rotate(4deg);}
+    50% {transform: translateX(-24px) translateY(4px) rotate(-4deg);}
+    100% {transform: translateX(0px) translateY(-2px) rotate(4deg);}
+}
+
+/* (meta)classes? */
+.checker-bg
+{
+    background-color: #121213;
+    background: linear-gradient(45deg, #2c2b2f 25%, transparent 25%, transparent 75%, #2c2b2f 75%, #2c2b2f),
+                linear-gradient(-45deg, #2c2b2f 25%, transparent 25%, transparent 75%, #2c2b2f 75%, #2c2b2f);
+    background-size: 64px 64px;
+    animation: bg-scroll-64px 1s linear infinite;
+}
+
+.drop-shadow-4px
+{
+    filter: drop-shadow(4px 4px 0px #121213);
+}
+
+.drop-shadow-soft
+{
+    filter: drop-shadow(0px 6px 8px #121213);
+}
+
+/* image metaclasses */
+.img-fill
+{
+    width: 100%;
+}
+
+.img-center
+{
+    position: relative;
+    margin: 0 auto 0 auto;
+}
+
 /* Set body margin */
 body
 {
@@ -122,6 +167,7 @@ div#aside-wrapper::after
     height: 100%;
 
     background-color: #ffdd00;
+    /* box-shadow: 0 0px 16px black; */
 }
 
 #aside-wrapper li.current::marker
@@ -184,12 +230,11 @@ div#article-wrapper
 
     /* margin: 2em 0 2em 0; */
     padding: 0.05em 3em 0.05em 3em;
-
     /* height: 100px; */
 
-    color: #121213;
-    background-color: #ffdd00;
-    box-shadow: 0 0 16px #ffdd00;
+    color: #ebdff7;
+    border: 1px solid #ebdff7;
+    box-shadow: 0 0 16px #5e5c62;
 }
 
 #article-wrapper .alert #left
@@ -204,20 +249,52 @@ div#article-wrapper
     height: 100%;
 }
 
+/* icon wrapper */
 #article-wrapper .alert #left #image
-{   
-    content: url(assets/ICON_NJOH.png);
-    position: relative;
+{
+    position: absolute;
     display: block;
 
     top: 50%;
     left: 50%;
 
-    transform: translate(-50%, -50%);
-    image-rendering: crisp-edges;
-
     width: 50px;
     height: 50px;
+    
+    transform: translate(-50%, -50%);
+}
+
+#article-wrapper .alert #left #image::before
+{   
+    content: "";
+    position: absolute;
+    display: block;
+
+    top: -16px;
+    width: 50px;
+    height: 50px;
+    
+    image-rendering: crisp-edges;
+    background-image: url(assets/ICON_NJOH.png);
+    background-size: 100% 100%;
+}
+
+#article-wrapper .alert #left #image::after
+{   
+    content: "";
+    position: absolute;
+    display: block;
+
+    top: 0;
+    left: 25px;
+    width: 80px;
+    height: 80px;
+    
+    image-rendering: crisp-edges;
+    background-image: url(assets/ICON_FINGER.png);
+    background-size: 100% 100%;
+
+    animation: bob-horizontal-90deg 1s ease-in-out infinite;
 }
 
 #article-wrapper .alert #right

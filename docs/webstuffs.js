@@ -27,7 +27,7 @@ function update_current_header ()
         node.className = "";
     });
 
-    asideList.childNodes[currentHeader].className = "current";
+    asideList.childNodes[currentHeader].className = "current drop-shadow-soft";
 }
 
 function page_init ()

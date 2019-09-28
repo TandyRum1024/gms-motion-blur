@@ -1,8 +1,7 @@
 //
-// Fullscreen motion blur
+// Fullscreen motion blur, With zoom blur gradually decreasing on the center of screen.
 //
 attribute vec3 in_Position;                  // (x,y,z)
-//attribute vec3 in_Normal;                  // (x,y,z)     unused in this shader.
 attribute vec4 in_Colour;                    // (r,g,b,a)
 attribute vec2 in_TextureCoord;              // (u,v)
 
@@ -11,121 +10,131 @@ varying vec2 v_vTexcoord;
 
 varying vec2 v_vTexsize; // size of texture
 varying vec2 v_vNoisesize; // size of noise texture
-varying vec2 v_vUVRatio; // Ratio of uv (To fix ratio of pixel)
-varying vec2 v_vPixelsize; // Size of single pixel in uv space
+varying vec2 v_vPixelsize; // Size of single pixel in uv space (aka inverse texture size)
+varying vec2 v_vNoisePixelSize; // Size of single pixel in noise texture uv space (aka inverse noise size)
 
 uniform vec2 uTexsize; // Size of texture : [width, height]
 uniform vec2 uNoisesize; // Size of noise texture : [width, height]
 
 void main()
 {
+    // normal vertex transformation & stuff
     vec4 object_space_pos = vec4( in_Position.x, in_Position.y, in_Position.z, 1.0);
     gl_Position = gm_Matrices[MATRIX_WORLD_VIEW_PROJECTION] * object_space_pos;
-    
     v_vColour = in_Colour;
     v_vTexcoord = in_TextureCoord;
-    
-    // texcoords ratio
-    v_vUVRatio = uTexsize / uTexsize.y;
     
     // set pixel size
     v_vPixelsize = vec2(1.0) / uTexsize;
     v_vTexsize = uTexsize;
     
     v_vNoisesize = uNoisesize;
+    v_vNoisePixelSize = vec2(1.0) / uNoisesize;
 }
 
 //######################_==_YOYO_SHADER_MARKER_==_######################@~//
-// Fullscreen Motionblur shader
+// Fullscreen motion blur, With zoom blur's strength gradually decreasing on the center of screen.
 //
-// #define DEBUG_NOISEUV
-#define NOISE_DITHER // Use dithering to smooth out the clunkiness?
-#define CLEAN_CENTER // Make the zoom blur strength decrease as we get closer to the center of the screen for visibility sakes?
-#define CLEAN_CENTER_RADIUS 0.05
-#define CLEAN_CENTER_FEATHER 0.6
+//#define DEBUG_NOISEUV
+#define SAMPLES_COUNT 5.0 // Number of samples used by blur, High samples means high quality blur.
+#define NOISE_DITHER // If uncommented, The shader uses dithering to reduce the banding effect. Works best with lower steps.
+#define CLEAN_CENTER_RADIUS 0.05 // maximum radius where the zoom starts to decrease.
+#define CLEAN_CENTER_FEATHER 0.6 // how gradual the zoom will decrease? the smaller is the sharper it will be.
 
 varying vec4 v_vColour;
 varying vec2 v_vTexcoord;
-
 varying vec2 v_vTexsize; // size of texture
 varying vec2 v_vNoisesize; // size of noise texture
-varying vec2 v_vUVRatio; // Ratio of uv (To fix ratio of pixel)
-varying vec2 v_vPixelsize; // Size of single pixel in uv space
+varying vec2 v_vPixelsize; // Size of single pixel in uv space (aka inverse texture size)
+varying vec2 v_vNoisePixelSize; // Size of single pixel in noise texture uv space (aka inverse noise size)
 
 uniform vec4 uVelocity; // camera velocity : [vx, vy, vzoom, vrotate]
 uniform vec3 uStrength; // blur strength : [translate, zoom, rotate]
 uniform float uTime; // time, used for random
 
-// (Blue) noise texture
+// noise texture! you can grab one from the link below :
 // http://momentsingraphics.de/?p=127
 uniform sampler2D sNoise;
 
+/// samples the noise texure and returns its red component.
 float noise2D (vec2 uv)
 {
-    return texture2D(sNoise, fract(uv)).r; //texture2D(sNoise, fract(uv + (vec2(uTime) * (vec2(1.0) / v_vNoisesize)))).r;
+    // pixel perfect noise scrolling
+    const float scrollSpeed = 16.0; // speed of noise texture scrolling, 0.0 to disable.
+    return texture2D(sNoise, fract(uv + mod(vec2(uTime * scrollSpeed), v_vNoisesize) * v_vNoisePixelSize)).r;
 }
 
+/// rotates given UV around the vec2(0.5) center and returns the result.
 vec2 rot2D (vec2 uv, vec2 texsize, float ang)
 {
     /// Calc rotated UV
     float rot = radians(ang);
-    mat2 rotm = mat2(cos(rot), -sin(rot), sin(rot), cos(rot));
-    
-    vec2 size = texsize;
-    vec2 rotuv = ((uv - 0.5) * texsize * rotm) / texsize + 0.5;
+    vec2 rotuv = ((uv - 0.5) * texsize * mat2(cos(rot), -sin(rot), sin(rot), cos(rot))) / texsize + 0.5;
     return rotuv;
 }
 
 void main()
 {
+    // the resulting colour that we will accumulate the blurred result onto.
+    vec4 final = vec4(0.0);
+
     // Screen-space uv for sampling noises, With correct aspect ratio.
-    vec2 screenuv = v_vTexsize * v_vTexcoord;
-    vec2 uvnoise = screenuv / v_vNoisesize;
+    vec2 uvnoise = v_vTexsize * v_vTexcoord * v_vNoisePixelSize;
 
     // calculate distance from center
-    vec2 ctDelta = v_vTexcoord - vec2(0.5);
-    vec2 ctNormalized = normalize(ctDelta);
-    float zoomStr = smoothstep(0.0, 0.5, length(ctDelta)) * uStrength.y * uVelocity.z;
+    // we multiply it with distance from the center to avoid lens-like distortion
+    vec2 ctDelta = v_vTexcoord - vec2(0.5); // distance from center
+    vec2 ctNormalized = normalize(ctDelta); // normalized direction from center
     
-    #ifdef CLEAN_CENTER
-        // Make it so that the zoom strength decreases the closer to the center of the screen
-        float ctDist = length(ctDelta);
-        float ctMix = min(smoothstep(CLEAN_CENTER_RADIUS, CLEAN_CENTER_RADIUS + CLEAN_CENTER_FEATHER, ctDist), 1.0);
-        zoomStr *= ctMix;
-    #endif
+    // Make it so that the zoom strength decreases the closer to the center of the screen
+    float ctDist = length(ctDelta);
+    float ctMix = min(smoothstep(CLEAN_CENTER_RADIUS, CLEAN_CENTER_RADIUS + CLEAN_CENTER_FEATHER, ctDist), 1.0);
+    
+    // calculate zoom factor using above variables
+    // we multiply it with distance from the center to avoid lens-like distortion
+    float zoomStr = ctDist * uStrength.y * uVelocity.z * ctMix;
     
     // and sum all the linear uv offsets that can be extrapolated.
-    // we need to calculate rotated uv in the following loop because unlike translation and zoom, Rotation offsets cannot be extrapolated via just scaling it.
+    // we need to calculate rotated uv in the following loop because unlike translation and zoom,
+    // Rotation offsets cannot be extrapolated via just scaling it by some factor.
     vec2 offsum = v_vPixelsize * uStrength.x * uVelocity.xy + -ctNormalized * zoomStr;
-    vec4 final = vec4(0.0);
+    
+    // Calculate rotation blur strength
+    float rotStr = -uVelocity.w * uStrength.z;
     
     // loop setup
-    const float steps = 6.0;
-    const float stepSize = 1.0 / steps;
+    const float stepSize = 1.0 / SAMPLES_COUNT;
+    
+    // pre-multiply blur factors by stepSize outside of the loop
+    offsum *= stepSize;
+    rotStr *= stepSize;
     
     #ifdef NOISE_DITHER
         // dithered blur
         // since we're offsetting the loop index (i) with dithered value of range [-stepsize, stepsize],
         // we exclude the first and last step in the loop.
         const float stepBegin = 1.0;
-        const float stepEnd = steps - 1.0;
-        const float stepFactor = 1.0 / (steps - 1.0);
+        const float stepEnd = SAMPLES_COUNT - 1.0;
+        const float stepFactor = 1.0 / (SAMPLES_COUNT - 1.0);
         
         // fetch screenspace noise value in [-1.0, 1.0] range for dithering
-        const float ditherScale = 1.00; // this controls the dithering-ness, the bigger the value is, the more dithered it is.
+        const float ditherScale = 1.00 * 2.0; // this controls the dithering-ness, the bigger the value is, the more dithered it is.
         float noise = noise2D(uvnoise);
-        float dither = (noise - 0.5) * (ditherScale * 2.0);
+        float dither = (noise - 0.5) * ditherScale;
         
         for (float i = stepBegin; i <= stepEnd; i += 1.0)
         {
             // calculate dithered offset factor (current factor +- stepsize)
-            float stepOffset = (i + dither) * stepSize;
+            float stepOffset = i + dither;
             
             // offset UV
+            // Since we've pre-multiplied offsum and rotStr above by stepSize, We don't have to multiply it here.
+            // if we didn't do it, We'd have to manually multiply the uv offset with stepSize to scale it down :
+            // vec2 uvoff = offsum * ((i + dither) * stepSize);
             vec2 uvoff = offsum * stepOffset;
             
             // get rotated uv
-            float angle = (-uVelocity.w * uStrength.z) * stepOffset;
+            float angle = rotStr * stepOffset;
             vec2 uvrot = rot2D(v_vTexcoord, v_vTexsize, angle);
             
             // sample & accumulate to final buffer
@@ -133,14 +142,14 @@ void main()
         }
     #else
         // non-dithered blur
-        const float stepFactor = 1.0 / (steps + 1.0);
-        for (float i = 0.0; i <= 1.0; i += stepSize)
+        const float stepFactor = 1.0 / (SAMPLES_COUNT + 1.0); // factor to make the result into [0.0..1.0] range
+        for (float i = 0.0; i <= SAMPLES_COUNT; i += 1.0)
         {
             // offset UV
             vec2 uvoff = offsum * i;
             
             // get rotated uv
-            float angle = (-uVelocity.w * uStrength.z) * i;
+            float angle = rotStr * i;
             vec2 uvrot = rot2D(v_vTexcoord, v_vTexsize, angle);
             
             // sample & accumulate to final buffer
@@ -148,6 +157,8 @@ void main()
         }
     #endif
     
+    // clamp the results to prevent colour values from getting out of bounds
+    final = clamp(final, 0.0, 1.0);
     gl_FragColor = final * v_vColour;
     
     // debug

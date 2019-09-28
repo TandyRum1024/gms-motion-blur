@@ -606,8 +606,7 @@ else
           <argument>
             <kind>1</kind>
             <string>/// viewmodel / HUD
-/*
-var _hudx = window_get_width() &gt;&gt; 1, _hudy = window_get_height() - 21;
+var _hudx = 32, _hudy = window_get_height() - 21;
 var _drawx = _hudx + viewmodelx + random_range(-viewmodelShakeCtr, viewmodelShakeCtr), _drawy = _hudy + viewmodely + random_range(-viewmodelShakeCtr, viewmodelShakeCtr);
 var _drawr = viewmodelr + random_range(-viewmodelShakeCtr, viewmodelShakeCtr) * 0.8;
 
@@ -622,15 +621,14 @@ var _metreperframe = vfwd / 8;
 var _mph = _metreperframe * 26.8224;
 var _hudstr = string(_mph) + " MPH";
 var _strscale = viewmodelScale * 0.5;
-var _viewmodelOffx = 21 * viewmodelScale;
+var _viewmodelOffx = 42 * viewmodelScale;
 
 draw_set_halign(0); draw_set_valign(2);
-draw_set_font(fntComicSans);
+draw_set_font(fntMenuTiny);
 draw_text_transformed_colour(_drawx + _viewmodelOffx + 2, _drawy, _hudstr, _strscale, _strscale, _drawr, c_black, c_black, c_black, c_black, 1.0);
 draw_text_transformed_colour(_drawx + _viewmodelOffx, _drawy, _hudstr, _strscale, _strscale, _drawr, _colour, _colour, _colour, _colour, 1.0);
 draw_set_font(fntDefault);
 draw_set_halign(0); draw_set_valign(0);
-*/
 </string>
           </argument>
         </arguments>

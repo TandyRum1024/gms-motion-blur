@@ -131,6 +131,7 @@
   </scripts>
   <shaders name="shaders">
     <shader type="GLSLES">shaders\sh_motionblur_fullscreen.shader</shader>
+    <shader type="GLSLES">shaders\sh_motionblur_nooptimized.shader</shader>
     <shader type="GLSLES">shaders\sh_motionblur_fullscreen_clearcenter.shader</shader>
     <shader type="GLSLES">shaders\sh_motionblur_debug.shader</shader>
     <shader type="GLSLES">shaders\shd_fire_calc.shader</shader>
