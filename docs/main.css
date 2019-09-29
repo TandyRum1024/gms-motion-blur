@@ -55,18 +55,25 @@ article.image-center
     text-align: center;
     background-color: black;
 }
-/*
+
 article.image-center #image-list
 {
-    display: flexbox;
-    flex-direction: column;
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    overflow: hidden;
+}
+
+#image-list img
+{
+    flex: 1 1 auto;
+    max-width: 100%;
 }
 
 html
 {
     scroll-behavior: smooth;
 }
-*/
 
 /* Set body margin */
 body
@@ -226,6 +233,9 @@ div#article-wrapper
 
     margin: 0 0 0 20%;
     width: 60%;
+
+    overflow-wrap: break-word;
+    overflow: hidden;
 
     background-color: #121213;
     box-shadow: 0 0 32px #121213;
