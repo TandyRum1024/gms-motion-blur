@@ -1,3 +1,21 @@
+var isBarOn = false;
+
+function toggle_bar ()
+{
+    var asidebar = document.body.querySelector("#aside-wrapper");
+
+    if (isBarOn)
+    {
+        isBarOn = false;
+        asidebar.className = "bar-show";
+    }
+    else
+    {
+        isBarOn = true;
+        asidebar.className = "bar-hide";
+    }
+}
+
 function update_current_header ()
 {
     var headerNodes = document.body.querySelectorAll("article > h1");
@@ -27,7 +45,7 @@ function update_current_header ()
         node.className = "";
     });
 
-    asideList.childNodes[currentHeader].className = "current drop-shadow-soft";
+    asideList.childNodes[currentHeader].className = "current";
 }
 
 function page_init ()
@@ -36,8 +54,8 @@ function page_init ()
 
     var asideNodes = document.body.querySelector("#aside-wrapper > aside");
     var asideList = document.body.querySelector("#aside-wrapper > aside > ul");
-    var tocNodes = document.body.querySelector("#toc-wrapper > aside");
-    var tocList = document.body.querySelector("#toc-wrapper > aside > ul");
+    var tocNodes = document.body.querySelector("#toc-wrapper > div");
+    var tocList = document.body.querySelector("#toc-wrapper > div > ul");
     var headerNodes = document.body.querySelectorAll("article > h1");
     
     // Clear & Initialize ToC and GOTO list
@@ -73,4 +91,7 @@ function page_init ()
     // Update current header / section index
     update_current_header();
     document.body.onscroll = update_current_header;
+
+    // hide bar
+    toggle_bar();
 }
