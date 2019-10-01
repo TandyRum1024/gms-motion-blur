@@ -1,0 +1,173 @@
+// 2019-10-01 20:13:38
+#event create UI & screen stuff
+winW = window_get_width();
+winH = window_get_height();
+iui_init();
+
+uiDemoType = 0;
+uiVelX = "0";
+uiVelY = "0";
+uiVelZ = "0";
+uiVelR = "0";
+uiStrength = "1";
+
+uiDither = true;
+#section Surfaces & motion blur shader
+surfW = floor(winW * 0.45);
+surfH = floor(winH * 0.6);
+
+surfResult = surface_create(surfW, surfH);
+surfMotions = surface_create(surfW, surfH);
+
+// shader properties
+time = 0; // current frame
+ditherEnabled = true;
+
+velX = 0;
+velY = 0;
+velZoom = 0;
+velRot = 0;
+velStrength = 1;
+
+noiseTex = sprite_get_texture(texBlueNoise64, 0);
+shVecTexSz = shader_get_uniform(sh_motionblur_showmotion, "uTexsize");
+shVecVel = shader_get_uniform(sh_motionblur_showmotion, "uVelocity");
+shVecStr = shader_get_uniform(sh_motionblur_showmotion, "uStrength");
+
+#event draw Surface update
+time++;
+
+var _cx = surfW * 0.5, _cy = surfH * 0.5;
+var surfSrc = surface_create(surfW, surfH); // temp surface
+if (!surface_exists(surfResult))
+    surfResult = surface_create(surfW, surfH);
+if (!surface_exists(surfMotions))
+    surfMotions = surface_create(surfW, surfH);
+
+// draw temp source
+surface_set_target(surfSrc);
+draw_clear(c_red);
+draw_background(background0, _cx - background_get_width(background0) * 0.5, _cy - background_get_height(background0) * 0.5);
+surface_reset_target();
+
+// motion blur
+surface_set_target(surfResult);
+draw_clear(c_fuchsia);
+
+// change shaders accordingly
+if (ditherEnabled)
+{
+    // dithering : yes
+    shader_set(sh_motionblur);
+    
+    shader_set_uniform_f(shader_get_uniform(sh_motionblur, "uTexsize"), surfW, surfH); // surface texture size
+    shader_set_uniform_f(shader_get_uniform(sh_motionblur, "uNoisesize"), 1 / texture_get_texel_width(noiseTex), 1 / texture_get_texel_height(noiseTex)); // noise texture size
+    shader_set_uniform_f(shader_get_uniform(sh_motionblur, "uVelocity"), velX, velY, velZoom, velRot); // camera veloctiy
+    shader_set_uniform_f(shader_get_uniform(sh_motionblur, "uStrength"), velStrength, velStrength, velStrength); // blur strength
+    shader_set_uniform_f(shader_get_uniform(sh_motionblur, "uTime"), time); // blur strength
+    texture_set_stage(shader_get_sampler_index(sh_motionblur, "sNoise"), noiseTex); // noise texture
+    
+    draw_surface(surfSrc, 0, 0);
+    
+    shader_reset();
+}
+else
+{
+    // dithering : no
+    shader_set(sh_motionblur_nodither);
+    
+    shader_set_uniform_f(shader_get_uniform(sh_motionblur_nodither, "uTexsize"), surfW, surfH); // surface texture size
+    shader_set_uniform_f(shader_get_uniform(sh_motionblur_nodither, "uNoisesize"), 1 / texture_get_texel_width(noiseTex), 1 / texture_get_texel_height(noiseTex)); // noise texture size
+    shader_set_uniform_f(shader_get_uniform(sh_motionblur_nodither, "uVelocity"), velX, velY, velZoom, velRot); // camera veloctiy
+    shader_set_uniform_f(shader_get_uniform(sh_motionblur_nodither, "uStrength"), velStrength, velStrength, velStrength); // blur strength
+    shader_set_uniform_f(shader_get_uniform(sh_motionblur_nodither, "uTime"), time); // blur strength
+    texture_set_stage(shader_get_sampler_index(sh_motionblur_nodither, "sNoise"), noiseTex); // noise texture
+    
+    draw_surface(surfSrc, 0, 0);
+    
+    shader_reset();
+}
+
+surface_reset_target();
+
+// motion vector visualization
+surface_set_target(surfMotions);
+draw_clear(c_fuchsia);
+shader_set(sh_motionblur_showmotion);
+shader_set_uniform_f(shVecTexSz, surfW, surfH); // surface texture size
+shader_set_uniform_f(shVecVel, velX, velY, velZoom, velRot); // camera veloctiy
+shader_set_uniform_f(shVecStr, velStrength, velStrength, velStrength); // blur strength
+draw_surface(surfSrc, 0, 0);
+shader_reset();
+surface_reset_target();
+
+// free temp surface
+surface_free(surfSrc);
+#section Draw background & surfaces
+var _cx = winW * 0.5, _cy = winH * 0.5;
+var _margin = 32;
+var _surfx1 = _cx - _margin - surfW;
+var _surfx2 = _cx + _margin;
+var _surfy = _cy - surfH * 0.5;
+
+draw_clear($131212);
+draw_surface(surfResult, _surfx1, _surfy);
+draw_surface(surfMotions, _surfx2, _surfy);
+
+// draw motion vector visualization
+// TYSM Misumen for buffer_getpixel() :3
+var _buf = buffer_getpixel_begin(surfMotions);
+var _hdiv = 20, _vdiv = 10;
+var _hunit = floor((surfW - 1) / _hdiv), _vunit = floor((surfH - 1) / _vdiv);
+var _2w = surfW * 0.007843137254902; // w * 2 * (1 / 255)
+var _2h = surfH * 0.007843137254902;
+for (var i=0; i<surfW; i+=_hunit)
+{
+    var _x = _surfx2 + i;
+    for (var j=0; j<surfH; j+=_vunit)
+    {
+        var _y = _surfy + j;
+        var _col = buffer_getpixel(_buf, i, j, surfW, surfH);
+        var _r = colour_get_red(_col) * _2w - surfW, _g = colour_get_green(_col) * _2h - surfH;
+        
+        draw_arrow(_x, _y, _x + _r, _y + _g, 6);
+    }
+}
+buffer_delete(_buf);
+
+
+#event draw_gui UI
+var _cx = winW * 0.5, _cy = winH * 0.5;
+iui_update_io();
+iui_begin();
+
+var _uiheight = 128;
+var _uix = 10;
+
+iui_rect(0, 0, winW, _uiheight-2, $2f2b2c);
+iui_rect(0, _uiheight-2, winW, 2, 0);
+
+uiDemoType = iui_tab(0, 0, winW, 42, iui_pack(), uiDemoType, 2);
+
+iui_label(_uix, 20, "VELOCITY [X, Y, ZOOM, ROT]", $3e6eef);
+uiVelX = iui_textbox_numberonly(_uix, 64, 80, 24, uiVelX, "VX");
+uiVelY = iui_textbox_numberonly(_uix + 100, 64, 80, 24, uiVelY, "VY");
+uiVelZ = iui_textbox_numberonly(_uix + 200, 64, 80, 24, uiVelZ, "VZ");
+uiVelR = iui_textbox_numberonly(_uix + 300, 64, 80, 24, uiVelR, "VR");
+
+_uix = 500
+iui_label(_uix, 20, "STRENGTH", $3e6eef);
+uiStrength = iui_textbox_numberonly(_uix, 64, 80, 24, uiStrength, "STR");
+
+_uix = 700
+iui_label(_uix, 20, "DITHER", $3e6eef);
+uiDither = iui_checkbox(_uix, 64, 24, 24, uiDither, "DITHER");
+
+iui_end();
+
+// set modified values
+if (uiVelX != "") velX = real(uiVelX);
+if (uiVelY != "") velY = real(uiVelY);
+if (uiVelZ != "") velZoom = real(uiVelZ);
+if (uiVelR != "") velRot = real(uiVelR);
+ditherEnabled = uiDither;

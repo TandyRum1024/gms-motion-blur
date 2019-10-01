@@ -8,6 +8,11 @@
     <link href="https://fonts.googleapis.com/css?family=Black+Han+Sans|Bree+Serif|Nanum+Gothic+Coding:400,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="main.css">
     <script type="text/javascript" src="webstuffs.js"></script>
+
+    <!-- highlight.js -->
+    <link rel="stylesheet" href="assets/styles/gruvbox-dark.css">
+    <script type="text/javascript" src="assets/highlight.pack.js"></script>
+    <script type="text/javascript">hljs.initHighlightingOnLoad();</script>
     <title>Things about: My motion blur tech demo for Gamemaker</title>
 </head>
 <body onload="page_init()">
@@ -71,18 +76,80 @@
                 </div>
                 <p>images of my motion blur doing motion blur-y stuff.</p>
             </article>
+            <p>
+            Back in 2017 when I had a <i>LOT</i> of free time after the midterm exam has ended, I was writing up some platformer engine for fun. After implementing the basic camera system and seeing it bounce around hillariously due to an error in the integrating method, I was struck with an idea about implementing a motion blur shader.<br>After fiddling around with GLSL Shading language, I managed to write up some decent camera based motion blur. And then I took it a step further, And implemented noised based dithering to make the result more smooth with better performance... But then I somehow stopped working on it. I'm not sure if its the dried-out enthusiasm or slump doing its job, It was shelved for god knows how long.. And it got removed when I (foolishly) wiped my hard drive with my old yet brilliant projects in it.<br>2 Years later, I've been lately experimenting with visual effects <i>(particularly blurring & procedural animations)</i> a lot.. And I remembered about the project with fancy motion blur tech being wiped & gone for good, I decided to <i>"revive"</i> the project by doing a complete rewrite.<br>
+            The rewrite went pretty well, And using the recently gained knowledge of shaders, I actually improved upon it too.<br>
+            And now since I don't wanna repeat the same foolish mistake again, I decided to make it open-sourced on internet & write some documents about it. Enjoy!
+            </p>
 
-            <p class>Lately, I've been experimenting with visual effects <i>(particularly blurring & procedural animations)</i> a lot.. Combining that with camera's motion informations, I was able to create the <b>camera based motion blurring effect</b>.<br>Motion blur was one of the many visual effects that inspired me to learn about Shaders, And it's one of my favorite effects because they can enhance the feelings of games by emphasizing its speedy-ness to make the users feel like they're scootin' around the cyberworld at break-neck speed!<br>So, With the Shaders I made two small projects for <i>(mainly fun and)</i> demonstration purposes.<br>And in this document (post?), I'll be explaining things about my shader.</p>
-
-            <h1 id="motionblur">The motion blur</h1><hr>
+            <h1 id="motionblur">Motion blur and motion offsets</h1><hr>
+            <p>
+                <img src="pics/EX_BLUR.png" class="image-center">
+                Motion blur in theory is about fast moving object's afterimage.. And for camera based motion blur, We can (cheap and easily) simulate it by applying blurs in various direction according to camera's velocity.<br>To be more specific, We can apply directional blurs for x and y movements of camera, zoom blur for forward/zooming movements of camera and rotational blur for... well, rotating movements of camera.<br>
+                <img src="pics/EX_COMPOSITE_BLUR.png" class="image-center">
+                We could just apply directional blur for x/y velocity then apply zoom & angular blur for zoom and rotational velocity of the camera.
+                But applying blur that way seems bit inefficient.. There's gotta be a better way!<br>Good news : We do have a better way for that. What we can do instead of aforementioned method is that we can combine the offset vectors calculated from camera's x, y and zoom velocity into one "offset vector" and use that alongside the rotational offset (that is calculated separately) when we're sampling the texture for the blur in shader. That way we can only use 1 blur pass for the motion blur!<br>
+                <article class="image-center">
+                    <img src="pics/EX_MOTION_OFFSETS.png" class="image-center">
+                    <p>figure illustrating the method of more efficient blurring method.</p>
+                </article>
+            </p>
             <article class="image-center">
                 <img src="pics/MOTION_BLUR_VISUALIZATION.png" style="width: 80%;">
-                <p>image featuring motion vectors being visualized<br>(left : resulting blurred image, right : sum of motion "offsets" that is used for blurring)</p>
+                <p>image featuring offset vectors being visualized<br>(left : resulting blurred image, right : sum of motion "offsets" that is used for blurring)</p>
             </article>
             <p>
-            Motion blur is caused by the afterimages from fast movements of object. And for camera based motion blur, We can (cheap and easily) simulate it by applying blurs in various direction according to camera's velocity.<br>To be more specific, We can apply "linear" blurs for x and y movements of camera, zoom blur for forward/zooming movements of camera and rotational blur for... well, rotating movements of camera.<br>
-            Normally we can just apply directional blur for x/y velocity then apply zoom & angular blur for zoom and rotational velocity of camera.<br>
-            But applying blur that way is bit inefficient in my opinion.. What we can do, however is that we can combine the x, y and zoom velocity into one "offset" vector and use that alongside the rotational velocity when we're sampling the screen texture for blur. This way we can calculate the motion blur in only one pass with single blurring procedure!<br>
+                The code below is the snippet of my motion blur shader that utilizes the principle above.
+                <pre><code class="glsl">
+// v_vTexcoord is the screenspace UV, ranging from [0..1].
+// Calculate distance from center for zoom offset factor.
+// we multiply it with distance from the center to avoid lens-like distortion
+vec2 ctDelta = v_vTexcoord - vec2(0.5); // distance from center
+vec2 ctNormalized = normalize(ctDelta); // normalized direction from center
+float zoomStr = length(ctDelta) * uStrength.y * uVelocity.z;
+
+// Calculate the offset vector from zoom & x/y velocity...
+vec2 xyVel = uStrength.x * uVelocity.xy;
+vec2 zoomVel = -ctNormalized * zoomStr;
+vec2 linearOff = v_vPixelsize * xyVel + zoomVel;
+
+// This is the loop that calculates the blur effect.
+const float stepFactor = 1.0 / (SAMPLES_COUNT + 1.0); // factor to make the result into [0.0..1.0] range
+const float stepSize = 1.0 / SAMPLES_COUNT;
+for (float i = 0.0; i <= SAMPLES_COUNT; i += 1.0)
+{
+    // interpolate "linear" offset UV
+    vec2 uvoff = linearOff * i * stepSize;
+    
+    // interpolate rotation angle and use it to get rotated uv
+    // Note : Unlike the x/y and zoom offset `linearOff` can be interpolated via multiplying by some factor in [0..1] range,
+    // Rotational offset cannot be interpolated by multiplying it by some factor.
+    // So we have to "interpolate" the angle [rotAngle] in the loop for blur and use the resulting angle to get the rotational offset.
+    float rotVel = -uVelocity.w * uStrength.z;
+    float angle = rotVel * i;
+
+    // rot2D() returns rotated UV from given UV and texture size and amount of rotation in degrees.
+    vec2 uvrot = rot2D(v_vTexcoord, v_vTexsize, angle);
+    
+    // this is the final UV that we can sample the texture with!
+    vec2 finalUV = uvrot + uvoff;
+
+    // sample & accumulate blurred result into final buffer.
+    // gm_BaseTexture is the texture of currently drawing VBO.. Basically we're sampling the screen texture.
+    final += texture2D(gm_BaseTexture, finalUV) * stepFactor;
+}
+                </code></pre>
+                You can see the full source & examples at the <a href="https://github.com/TandyRum1024/gms-motion-blur">GitHub repo</a>.<br>
+                <br>
+                Note #1 :<br>
+                <code>vec2 v_vTexcoord</code> is the screenspace UV, ranging from [0..1].<br>
+                <code>vec2 v_vTexsize</code> is the size of screen texture, Or the size of screen.<br>
+                <code>sampler2D gm_BaseTexture</code> is the sampler / texture of Vertices, You can assume this as a screen texture.<br>
+                <code>vec2 rot2D()</code> returns rotated UV from given UV and texture size and amount of rotation in degrees.<br>
+                <br>
+                Note #2 :<br>
+                Notice that we're calculating the rotational offsets in the blurring loop... This is because unlike the x/y and zoom offsets (which can be "interpolated" via multiplying the offsets by some factor in [0..1] range), The rotational offset itself cannot be interpolated by multiplying the offset.<br>
+                Instead, We need to interpolate the angle that we use to get the rotated UVs, And use the sum of rotated UVs and aforementioned x/y and zoom offsets to sample the textures!
             </p>
 
             <h1 id="dithering">The dithering</h1><hr>
