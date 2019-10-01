@@ -81,8 +81,8 @@
             </article>
             <p>
             Motion blur is caused by the afterimages from fast movements of object. And for camera based motion blur, We can (cheap and easily) simulate it by applying blurs in various direction according to camera's velocity.<br>To be more specific, We can apply "linear" blurs for x and y movements of camera, zoom blur for forward/zooming movements of camera and rotational blur for... well, rotating movements of camera.<br>
-            My motion blur shader does almost same as I stated earlier.. But instead of applying multiple blurs for each velocities, I calculated the sum of x, y, zoom velocity and then used it to interpolate the offset vectors inside of the blurring loop, then I've used the resulting offset vectors with rotated base UVs to sample the image.<br>
-            You can see the visualized offset vectors above.
+            Normally we can just apply directional blur for x/y velocity then apply zoom & angular blur for zoom and rotational velocity of camera.<br>
+            But applying blur that way is bit inefficient in my opinion.. What we can do, however is that we can combine the x, y and zoom velocity into one "offset" vector and use that alongside the rotational velocity when we're sampling the screen texture for blur. This way we can calculate the motion blur in only one pass with single blurring procedure!<br>
             </p>
 
             <h1 id="dithering">The dithering</h1><hr>
